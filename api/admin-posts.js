@@ -1,9 +1,8 @@
-import { kv } from '@vercel/kv';
+import { createClient } from 'redis';
 
 export default async function handler(request) {
-  const url = new URL(request.url);
   const method = request.method;
-  const postId = url.searchParams.get('id');
+  let client;
 
   // Handle CORS
   if (method === 'OPTIONS') {
@@ -11,35 +10,28 @@ export default async function handler(request) {
       status: 200,
       headers: {
         'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type',
       },
     });
   }
 
   try {
-    // Check if admin
-    const clientIP = request.headers.get('x-forwarded-for') || 
-                     request.headers.get('x-real-ip') || 
-                     'unknown';
+    client = createClient({
+      url: process.env.REDIS_URL || 'redis://default:M4L4KWbQF8Vu9ERqYtTfJji9gugjPfuh@redis-11404.c300.eu-central-1-1.ec2.redns.redis-cloud.com:11404'
+    });
     
-    const adminIPs = await kv.get('admin_ips') || ['127.0.0.1', '::1'];
-    const normalizedIP = clientIP.split(',')[0].trim();
-    
-    if (!adminIPs.includes(normalizedIP)) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 403,
-        headers: { 
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*'
-        },
-      });
-    }
+    await client.connect();
 
     if (method === 'GET') {
-      // Get all posts (including unpublished)
-      const posts = await kv.get('posts') || [];
-      return new Response(JSON.stringify(posts), {
+      // Get all posts
+      const postsStr = await client.get('posts');
+      const posts = postsStr ? JSON.parse(postsStr) : [];
+      const publishedPosts = posts.filter(post => post.is_published !== false);
+      
+      await client.quit();
+      
+      return new Response(JSON.stringify(publishedPosts), {
         status: 200,
         headers: { 
           'Content-Type': 'application/json',
@@ -48,15 +40,20 @@ export default async function handler(request) {
       });
     }
 
-    if (method === 'PUT' && postId) {
-      // Update post
-      const body = await request.json();
-      const posts = await kv.get('posts') || [];
-      const postIndex = posts.findIndex(p => p.id === postId);
+    if (method === 'POST') {
+      // Check if admin
+      const clientIP = request.headers.get('x-forwarded-for') || 
+                       request.headers.get('x-real-ip') || 
+                       'unknown';
       
-      if (postIndex === -1) {
-        return new Response(JSON.stringify({ error: 'Post not found' }), {
-          status: 404,
+      const adminIPsStr = await client.get('admin_ips');
+      const adminIPs = adminIPsStr ? JSON.parse(adminIPsStr) : ['127.0.0.1', '::1'];
+      const normalizedIP = clientIP.split(',')[0].trim();
+      
+      if (!adminIPs.includes(normalizedIP)) {
+        await client.quit();
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 403,
           headers: { 
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*'
@@ -64,19 +61,26 @@ export default async function handler(request) {
         });
       }
 
-      posts[postIndex] = {
-        ...posts[postIndex],
+      // Create new post
+      const body = await request.json();
+      const newPost = {
+        id: crypto.randomUUID(),
         title: body.title,
         content: body.content,
         tags: JSON.stringify(body.tags || []),
-        is_published: body.is_published,
-        updated_at: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+        is_published: body.is_published !== false,
       };
 
-      await kv.set('posts', posts);
+      const postsStr = await client.get('posts');
+      const posts = postsStr ? JSON.parse(postsStr) : [];
+      posts.unshift(newPost);
+      await client.set('posts', JSON.stringify(posts));
       
-      return new Response(JSON.stringify(posts[postIndex]), {
-        status: 200,
+      await client.quit();
+
+      return new Response(JSON.stringify(newPost), {
+        status: 201,
         headers: { 
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*'
@@ -84,21 +88,8 @@ export default async function handler(request) {
       });
     }
 
-    if (method === 'DELETE' && postId) {
-      // Delete post
-      const posts = await kv.get('posts') || [];
-      const filteredPosts = posts.filter(p => p.id !== postId);
-      await kv.set('posts', filteredPosts);
-      
-      return new Response(JSON.stringify({ success: true }), {
-        status: 200,
-        headers: { 
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*'
-        },
-      });
-    }
-
+    await client.quit();
+    
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
       headers: { 
@@ -107,6 +98,13 @@ export default async function handler(request) {
       },
     });
   } catch (error) {
+    if (client) {
+      try {
+        await client.quit();
+      } catch (e) {
+        console.error('Error closing Redis connection:', e);
+      }
+    }
     console.error('API Error:', error);
     return new Response(JSON.stringify({ 
       error: 'Internal server error',
@@ -120,7 +118,3 @@ export default async function handler(request) {
     });
   }
 }
-
-export const config = {
-  runtime: 'edge',
-};
