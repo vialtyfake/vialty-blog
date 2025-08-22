@@ -14,7 +14,6 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname)));
 
 // Database initialization
 const db = new sqlite3.Database('./blog.db');
@@ -105,6 +104,43 @@ async function requireAdmin(req, res, next) {
 
 // API Routes
 
+// Check admin status - FIXED ENDPOINT
+app.get('/api/admin-check', async (req, res) => {
+    const clientIP = getClientIP(req);
+    const normalizedIP = clientIP.replace(/^::ffff:/, '');
+    
+    try {
+        const isAdmin = await isAdminIP(normalizedIP);
+        res.json({ isAdmin, ip: normalizedIP });
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Search posts
+app.get('/api/search', (req, res) => {
+    const query = req.query.q;
+    if (!query) {
+        return res.json([]);
+    }
+    
+    db.all(
+        `SELECT * FROM posts 
+         WHERE is_published = 1 
+         AND (title LIKE ? OR content LIKE ? OR tags LIKE ?)
+         ORDER BY created_at DESC
+         LIMIT 10`,
+        [`%${query}%`, `%${query}%`, `%${query}%`],
+        (err, rows) => {
+            if (err) {
+                res.status(500).json({ error: err.message });
+            } else {
+                res.json(rows);
+            }
+        }
+    );
+});
+
 // Get all published posts (public)
 app.get('/api/posts', (req, res) => {
     db.all(
@@ -192,21 +228,8 @@ app.delete('/api/posts/:id', requireAdmin, (req, res) => {
     );
 });
 
-// Check admin status
-app.get('/api/admin/check', async (req, res) => {
-    const clientIP = getClientIP(req);
-    const normalizedIP = clientIP.replace(/^::ffff:/, '');
-    
-    try {
-        const isAdmin = await isAdminIP(normalizedIP);
-        res.json({ isAdmin, ip: normalizedIP });
-    } catch (error) {
-        res.status(500).json({ error: 'Server error' });
-    }
-});
-
-// Get all admin IPs (admin only)
-app.get('/api/admin/ips', requireAdmin, (req, res) => {
+// Get all admin IPs (admin only) - FIXED ENDPOINT
+app.get('/api/admin-ips', requireAdmin, (req, res) => {
     db.all(
         `SELECT * FROM admin_ips ORDER BY created_at DESC`,
         [],
@@ -220,8 +243,8 @@ app.get('/api/admin/ips', requireAdmin, (req, res) => {
     );
 });
 
-// Add admin IP (admin only)
-app.post('/api/admin/ips', requireAdmin, (req, res) => {
+// Add admin IP (admin only) - FIXED ENDPOINT
+app.post('/api/admin-ips', requireAdmin, (req, res) => {
     const { ip_address, name } = req.body;
     const id = uuidv4();
     
@@ -242,28 +265,13 @@ app.post('/api/admin/ips', requireAdmin, (req, res) => {
     );
 });
 
-// Toggle admin IP status (admin only)
-app.put('/api/admin/ips/:id/toggle', requireAdmin, (req, res) => {
-    db.run(
-        `UPDATE admin_ips SET is_active = CASE WHEN is_active = 1 THEN 0 ELSE 1 END WHERE id = ?`,
-        [req.params.id],
-        function(err) {
-            if (err) {
-                res.status(500).json({ error: err.message });
-            } else if (this.changes === 0) {
-                res.status(404).json({ error: 'IP not found' });
-            } else {
-                res.json({ success: true });
-            }
-        }
-    );
-});
-
-// Delete admin IP (admin only)
-app.delete('/api/admin/ips/:id', requireAdmin, (req, res) => {
+// Delete admin IP (admin only) - FIXED ENDPOINT
+app.delete('/api/admin-ips', requireAdmin, (req, res) => {
+    const { id } = req.query;
+    
     db.run(
         `DELETE FROM admin_ips WHERE id = ?`,
-        [req.params.id],
+        [id],
         function(err) {
             if (err) {
                 res.status(500).json({ error: err.message });
@@ -276,33 +284,100 @@ app.delete('/api/admin/ips/:id', requireAdmin, (req, res) => {
     );
 });
 
-// Get all posts for admin (including unpublished)
-app.get('/api/admin/posts', requireAdmin, (req, res) => {
-    db.all(
-        `SELECT * FROM posts ORDER BY created_at DESC`,
-        [],
-        (err, rows) => {
+// Get all posts for admin (including unpublished) - FIXED ENDPOINT
+app.get('/api/admin-posts', requireAdmin, (req, res) => {
+    const { id } = req.query;
+    
+    if (id) {
+        // Get single post for editing
+        db.get(
+            `SELECT * FROM posts WHERE id = ?`,
+            [id],
+            (err, row) => {
+                if (err) {
+                    res.status(500).json({ error: err.message });
+                } else if (!row) {
+                    res.status(404).json({ error: 'Post not found' });
+                } else {
+                    res.json(row);
+                }
+            }
+        );
+    } else {
+        // Get all posts
+        db.all(
+            `SELECT * FROM posts ORDER BY created_at DESC`,
+            [],
+            (err, rows) => {
+                if (err) {
+                    res.status(500).json({ error: err.message });
+                } else {
+                    res.json(rows);
+                }
+            }
+        );
+    }
+});
+
+// Update post (admin only) - FIXED ENDPOINT
+app.put('/api/admin-posts', requireAdmin, (req, res) => {
+    const { id } = req.query;
+    const { title, content, tags, is_published } = req.body;
+    
+    db.run(
+        `UPDATE posts SET title = ?, content = ?, tags = ?, is_published = ?, updated_at = CURRENT_TIMESTAMP 
+         WHERE id = ?`,
+        [title, content, JSON.stringify(tags || []), is_published !== false ? 1 : 0, id],
+        function(err) {
             if (err) {
                 res.status(500).json({ error: err.message });
+            } else if (this.changes === 0) {
+                res.status(404).json({ error: 'Post not found' });
             } else {
-                res.json(rows);
+                res.json({ success: true });
             }
         }
     );
 });
 
-// Admin panel route (this should already exist)
+// Delete post (admin only) - FIXED ENDPOINT
+app.delete('/api/admin-posts', requireAdmin, (req, res) => {
+    const { id } = req.query;
+    
+    db.run(
+        `DELETE FROM posts WHERE id = ?`,
+        [id],
+        function(err) {
+            if (err) {
+                res.status(500).json({ error: err.message });
+            } else if (this.changes === 0) {
+                res.status(404).json({ error: 'Post not found' });
+            } else {
+                res.json({ success: true });
+            }
+        }
+    );
+});
+
+// Page Routes - MUST COME BEFORE STATIC FILES
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'admin.html'));
 });
 
-// Add this new route for the About page
 app.get('/about', (req, res) => {
     res.sendFile(path.join(__dirname, 'about.html'));
 });
+
+// Serve static files AFTER specific routes
+app.use(express.static(path.join(__dirname)));
 
 // Start server
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}/`);
     console.log(`Admin panel at http://localhost:${PORT}/admin`);
+    console.log(`About page at http://localhost:${PORT}/about`);
 });
