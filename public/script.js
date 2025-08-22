@@ -58,6 +58,18 @@ async function loadBlogPosts() {
         const response = await fetch('/api/posts');
         blogPosts = await response.json();
         window.posts = blogPosts; // Store globally for search
+        
+        // Fetch view counts for each post
+        for (let post of blogPosts) {
+            try {
+                const viewResponse = await fetch(`/api/views?postId=${post.id}`);
+                const viewData = await viewResponse.json();
+                post.views = viewData.views || 0;
+            } catch (error) {
+                post.views = 0;
+            }
+        }
+        
         renderBlogPosts();
     } catch (error) {
         console.error('Error loading posts:', error);
@@ -220,7 +232,6 @@ function renderBlogPosts() {
 function createPostElement(post) {
     const article = document.createElement('article');
     article.className = 'blog-post';
-    article.style.cursor = 'pointer';
     
     // Parse tags
     let tags = [];
@@ -230,31 +241,36 @@ function createPostElement(post) {
         tags = [];
     }
     
+    // Get first tag as category
+    const category = tags[0] || 'General';
+    
     article.innerHTML = `
-        <div class="post-header">
-            <p class="post-date">${formatDate(new Date(post.created_at))}</p>
+        <div class="post-card-header">
+            <div class="post-meta">
+                <span class="post-date">${formatDate(new Date(post.created_at))}</span>
+                <span class="post-category">${escapeHtml(category)}</span>
+            </div>
             <h3 class="post-title">${escapeHtml(post.title)}</h3>
         </div>
-        <p class="post-content">${escapeHtml(post.content.substring(0, 150))}...</p>
-        ${tags.length > 0 ? `
+        <p class="post-excerpt">${escapeHtml(post.content.substring(0, 150))}...</p>
+        <div class="post-card-footer">
             <div class="post-tags">
-                ${tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}
+                ${tags.slice(0, 3).map(tag => `<span class="post-tag">#${escapeHtml(tag)}</span>`).join('')}
             </div>
-        ` : ''}
-        <div class="post-footer" style="display: flex; justify-content: flex-end; align-items: center; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
-            <span style="color: #00ff88; font-size: 0.9rem;">Read more →</span>
+            <span class="read-more">Read more →</span>
         </div>
     `;
     
-    // Add click event to display full post
-    article.addEventListener('click', () => {
-        displaySinglePost(post.id);
+    // Add click event to display full post in modal
+    article.addEventListener('click', (e) => {
+        e.preventDefault();
+        openPostView(post);
     });
     
     return article;
 }
 
-// Display single post WITHOUT view tracking
+// Display single post with view tracking
 function displaySinglePost(postId) {
     const post = blogPosts.find(p => p.id === postId);
     if (!post) return;
@@ -300,6 +316,7 @@ function displaySinglePost(postId) {
             </h1>
             <div style="color: #999; margin-bottom: 2rem; display: flex; gap: 2rem; flex-wrap: wrap; font-size: 0.95rem;">
                 <span>📅 ${formatDate(new Date(post.created_at))}</span>
+                <span id="viewCount-${postId}">👁️ Loading...</span>
                 ${post.author_ip && isAdmin ? `<span>📍 ${post.author_ip}</span>` : ''}
             </div>
             ${tags.length > 0 ? `
@@ -319,8 +336,37 @@ function displaySinglePost(postId) {
         </article>
     `;
     
+    // Track the view!
+    trackView(postId);
+    
     // Scroll to top of post
     window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Track view function
+async function trackView(postId) {
+    try {
+        const response = await fetch(`/api/views?postId=${postId}`, { method: 'POST' });
+        const data = await response.json();
+        
+        // Update the view count display
+        const viewElement = document.getElementById(`viewCount-${postId}`);
+        if (viewElement) {
+            viewElement.textContent = `👁️ ${data.views} views`;
+        }
+        
+        // Update in our local posts array
+        const post = blogPosts.find(p => p.id === postId);
+        if (post) {
+            post.views = data.views;
+        }
+    } catch (error) {
+        console.error('Error tracking view:', error);
+        const viewElement = document.getElementById(`viewCount-${postId}`);
+        if (viewElement) {
+            viewElement.textContent = `👁️ - views`;
+        }
+    }
 }
 
 // Back to list function
@@ -330,6 +376,9 @@ window.backToList = function() {
         singlePost.style.display = 'none';
     }
     blogGrid.style.display = 'grid';
+    
+    // Reload posts to show updated view counts
+    loadBlogPosts();
 }
 
 // Make displaySinglePost globally available for search results
@@ -454,3 +503,75 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+// ADD THESE NEW FUNCTIONS TO YOUR script.js
+
+// New function to open post in modal
+function openPostView(post) {
+    const modal = document.getElementById('postViewModal');
+    const modalBody = document.getElementById('postModalBody');
+    
+    // Parse tags
+    let tags = [];
+    try {
+        tags = typeof post.tags === 'string' ? JSON.parse(post.tags || '[]') : post.tags || [];
+    } catch {
+        tags = [];
+    }
+    
+    modalBody.innerHTML = `
+        <div class="modal-post-header">
+            <h1 class="modal-post-title">${escapeHtml(post.title)}</h1>
+            <div class="modal-post-meta">
+                <span>📅 ${formatDate(new Date(post.created_at))}</span>
+                <span>📝 ${post.content.split(' ').length} words</span>
+                <span>⏱️ ${Math.ceil(post.content.split(' ').length / 200)} min read</span>
+            </div>
+        </div>
+        <div class="modal-post-content">
+            ${escapeHtml(post.content).replace(/\n/g, '<br>')}
+        </div>
+        ${tags.length > 0 ? `
+            <div class="modal-post-tags">
+                ${tags.map(tag => `<span class="modal-tag">#${escapeHtml(tag)}</span>`).join('')}
+            </div>
+        ` : ''}
+    `;
+    
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    
+    // Animate content
+    modalBody.style.opacity = '0';
+    modalBody.style.transform = 'translateY(20px)';
+    setTimeout(() => {
+        modalBody.style.transition = 'all 0.4s ease';
+        modalBody.style.opacity = '1';
+        modalBody.style.transform = 'translateY(0)';
+    }, 100);
+}
+
+// Function to close post modal
+window.closePostView = function() {
+    const modal = document.getElementById('postViewModal');
+    modal.classList.remove('active');
+    document.body.style.overflow = 'auto';
+}
+
+// Update displaySinglePost for search results
+window.displaySinglePost = function(postId) {
+    const post = blogPosts.find(p => p.id === postId);
+    if (post) {
+        openPostView(post);
+    }
+}
+
+// Add ESC key to close modal
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        const modal = document.getElementById('postViewModal');
+        if (modal.classList.contains('active')) {
+            closePostView();
+        }
+    }
+});
