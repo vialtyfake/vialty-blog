@@ -291,9 +291,14 @@ app.get('/api/admin/posts', requireAdmin, (req, res) => {
     );
 });
 
-// Serve admin page
+// Admin panel route (this should already exist)
 app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'admin.html'));
+});
+
+// Add this new route for the About page
+app.get('/about', (req, res) => {
+    res.sendFile(path.join(__dirname, 'about.html'));
 });
 
 // Start server

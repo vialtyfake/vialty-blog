@@ -125,11 +125,11 @@ function setupEventListeners() {
     navClose.addEventListener('click', closeNav);
 
     navLinks.forEach(link => {
-    link.addEventListener('click', (e) => {
-        // Don't prevent default for admin and about links
-        if (link.getAttribute('href') === '/admin' || link.getAttribute('href') === '/about') {
-            return;
-        }
+        link.addEventListener('click', (e) => {
+            // Don't prevent default for admin link
+            if (link.getAttribute('href') === '/admin') {
+                return;
+            }
             
             e.preventDefault();
             const targetId = link.getAttribute('href').substring(1);
