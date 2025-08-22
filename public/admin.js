@@ -299,13 +299,16 @@ function closePostModal() {
 async function handlePostSubmit(e) {
     e.preventDefault();
     
-    const postId = document.getElementById('postId').value;
+    if (!isAdmin) {
+        showNotification('You do not have permission to create posts.', 'error');
+        return;
+    }
+    
     const title = document.getElementById('postTitle').value;
-    const content = document.getElementById('postContent').value;
-    const tags = document.getElementById('postTags').value
-        .split(',')
-        .map(tag => tag.trim())
-        .filter(tag => tag);
+    const content = document.getElementById('postContentInput').value; // Changed from 'postContent'
+    const tagsInput = document.getElementById('postTags').value;
+    const tags = tagsInput ? tagsInput.split(',').map(tag => tag.trim()) : [];
+    
     const is_published = document.getElementById('postPublished').checked;
     
     try {

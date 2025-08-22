@@ -23,19 +23,87 @@ function setupEventListeners() {
         navClose.addEventListener('click', closeNav);
     }
 
-    // Close menu when clicking outside
-    document.addEventListener('click', (e) => {
-        if (navMenu && navMenu.classList.contains('active')) {
-            if (!navMenu.contains(e.target) && !menuButton.contains(e.target)) {
-                closeNav();
-            }
-        }
-    });
+    if (navLinks) {
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                const href = link.getAttribute('href');
+                
+                // Check if it's an external link
+                if (link.classList.contains('external-link')) {
+                    // Don't prevent default for external links
+                    closeNav();
+                    return;
+                }
+                
+                // Check if it's the admin link
+                if (href === '/admin') {
+                    closeNav();
+                    return;
+                }
+                
+                // Handle hash navigation
+                if (href && href.startsWith('#')) {
+                    e.preventDefault();
+                    const targetId = href.substring(1);
+                    closeNav();
+                    
+                    // Smooth scroll to section
+                    const targetSection = document.getElementById(targetId);
+                    if (targetSection) {
+                        targetSection.scrollIntoView({ behavior: 'smooth' });
+                    }
+                    
+                    // Update active link
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+                }
+            });
+        });
+    }
 
-    // ESC key to close menu
+    // Rest of your event listeners remain the same...
+    // Modal controls
+    if (newPostBtn) {
+        newPostBtn.addEventListener('click', () => {
+            if (isAdmin) {
+                postModal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        });
+    }
+
+    if (modalClose) {
+        modalClose.addEventListener('click', closeModal);
+    }
+    
+    if (cancelPost) {
+        cancelPost.addEventListener('click', closeModal);
+    }
+
+    // Close modal when clicking outside
+    if (postModal) {
+        postModal.addEventListener('click', (e) => {
+            if (e.target === postModal) {
+                closeModal();
+            }
+        });
+    }
+
+    // Form submission
+    if (postForm) {
+        postForm.addEventListener('submit', handlePostSubmit);
+    }
+    
+    // ESC key to close modals
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && navMenu.classList.contains('active')) {
-            closeNav();
+        if (e.key === 'Escape') {
+            const postViewModal = document.getElementById('postViewModal');
+            if (postViewModal && postViewModal.classList.contains('active')) {
+                closePostView();
+            }
+            if (postModal && postModal.classList.contains('active')) {
+                closeModal();
+            }
         }
     });
 }
