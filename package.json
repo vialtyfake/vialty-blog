@@ -20,5 +20,8 @@
   "homepage": "https://github.com/vialtyfake/vialty-blog#readme",
   "devDependencies": {
     "vercel": "^32.0.1"
+  },
+  "dependencies": {
+    "redis": "^5.8.2"
   }
 }
