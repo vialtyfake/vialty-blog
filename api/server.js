@@ -5,7 +5,6 @@ const path = require('path');
 const fs = require('fs').promises;
 const sqlite3 = require('sqlite3').verbose();
 const { v4: uuidv4 } = require('uuid');
-const bcrypt = require('bcryptjs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -102,9 +101,35 @@ async function requireAdmin(req, res, next) {
     }
 }
 
+// IMPORTANT: Define specific routes BEFORE static files
+
+// Home page
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// About page
+app.get('/about', (req, res) => {
+    const aboutPath = path.join(__dirname, 'about.html');
+    // Check if file exists
+    require('fs').access(aboutPath, require('fs').constants.F_OK, (err) => {
+        if (err) {
+            console.error('about.html not found at:', aboutPath);
+            res.status(404).send('About page not found. Please create about.html file.');
+        } else {
+            res.sendFile(aboutPath);
+        }
+    });
+});
+
+// Admin panel
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'admin.html'));
+});
+
 // API Routes
 
-// Check admin status - FIXED ENDPOINT
+// Check admin status
 app.get('/api/admin-check', async (req, res) => {
     const clientIP = getClientIP(req);
     const normalizedIP = clientIP.replace(/^::ffff:/, '');
@@ -228,7 +253,7 @@ app.delete('/api/posts/:id', requireAdmin, (req, res) => {
     );
 });
 
-// Get all admin IPs (admin only) - FIXED ENDPOINT
+// Admin endpoints
 app.get('/api/admin-ips', requireAdmin, (req, res) => {
     db.all(
         `SELECT * FROM admin_ips ORDER BY created_at DESC`,
@@ -243,7 +268,6 @@ app.get('/api/admin-ips', requireAdmin, (req, res) => {
     );
 });
 
-// Add admin IP (admin only) - FIXED ENDPOINT
 app.post('/api/admin-ips', requireAdmin, (req, res) => {
     const { ip_address, name } = req.body;
     const id = uuidv4();
@@ -265,7 +289,6 @@ app.post('/api/admin-ips', requireAdmin, (req, res) => {
     );
 });
 
-// Delete admin IP (admin only) - FIXED ENDPOINT
 app.delete('/api/admin-ips', requireAdmin, (req, res) => {
     const { id } = req.query;
     
@@ -284,12 +307,10 @@ app.delete('/api/admin-ips', requireAdmin, (req, res) => {
     );
 });
 
-// Get all posts for admin (including unpublished) - FIXED ENDPOINT
 app.get('/api/admin-posts', requireAdmin, (req, res) => {
     const { id } = req.query;
     
     if (id) {
-        // Get single post for editing
         db.get(
             `SELECT * FROM posts WHERE id = ?`,
             [id],
@@ -304,7 +325,6 @@ app.get('/api/admin-posts', requireAdmin, (req, res) => {
             }
         );
     } else {
-        // Get all posts
         db.all(
             `SELECT * FROM posts ORDER BY created_at DESC`,
             [],
@@ -319,7 +339,6 @@ app.get('/api/admin-posts', requireAdmin, (req, res) => {
     }
 });
 
-// Update post (admin only) - FIXED ENDPOINT
 app.put('/api/admin-posts', requireAdmin, (req, res) => {
     const { id } = req.query;
     const { title, content, tags, is_published } = req.body;
@@ -340,7 +359,6 @@ app.put('/api/admin-posts', requireAdmin, (req, res) => {
     );
 });
 
-// Delete post (admin only) - FIXED ENDPOINT
 app.delete('/api/admin-posts', requireAdmin, (req, res) => {
     const { id } = req.query;
     
@@ -359,21 +377,13 @@ app.delete('/api/admin-posts', requireAdmin, (req, res) => {
     );
 });
 
-// Page Routes - MUST COME BEFORE STATIC FILES
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-app.get('/admin', (req, res) => {
-    res.sendFile(path.join(__dirname, 'admin.html'));
-});
-
-app.get('/about', (req, res) => {
-    res.sendFile(path.join(__dirname, 'about.html'));
-});
-
-// Serve static files AFTER specific routes
+// Serve static files AFTER all routes
 app.use(express.static(path.join(__dirname)));
+
+// 404 handler - must be last
+app.use((req, res) => {
+    res.status(404).send('Page not found');
+});
 
 // Start server
 app.listen(PORT, () => {
