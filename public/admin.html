@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard - VIALTY</title>
+    <link rel="stylesheet" href="globals.css" />
+    <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Access Check -->
+        <div id="accessCheck" class="access-overlay">
+            <div class="access-content">
+                <h2>Checking Access...</h2>
+                <div class="loader"></div>
+            </div>
+        </div>
+
+        <!-- Access Denied -->
+        <div id="accessDenied" class="access-overlay" style="display: none;">
+            <div class="access-content">
+                <h2>Access Denied</h2>
+                <p>Your IP address is not authorized to access this admin panel.</p>
+                <p class="ip-display">Your IP: <span id="userIP"></span></p>
+                <a href="/" class="btn-back">Go Back to Home</a>
+            </div>
+        </div>
+
+        <!-- Admin Dashboard -->
+        <div id="adminDashboard" style="display: none;">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <h1>VIALTY</h1>
+                    <span class="admin-badge">ADMIN</span>
+                </div>
+                <nav class="sidebar-nav">
+                    <a href="#posts" class="nav-item active" data-section="posts">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M5 3h10v14H5V3z" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M8 7h4M8 10h4M8 13h2" stroke="currentColor" stroke-width="1.5"/>
+                        </svg>
+                        Blog Posts
+                    </a>
+                    <a href="#ips" class="nav-item" data-section="ips">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M10 2v16M2 10h16" stroke="currentColor" stroke-width="1.5"/>
+                            <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/>
+                        </svg>
+                        Admin IPs
+                    </a>
+                    <a href="/" class="nav-item">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M3 10h14M10 3l7 7-7 7" stroke="currentColor" stroke-width="1.5"/>
+                        </svg>
+                        View Site
+                    </a>
+                </nav>
+                <div class="sidebar-footer">
+                    <p class="admin-ip">IP: <span id="adminIP"></span></p>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <!-- Posts Section -->
+                <section id="postsSection" class="content-section active">
+                    <div class="section-header">
+                        <h2>Manage Blog Posts</h2>
+                        <button class="btn-primary" id="newPostBtn">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M10 4v12m-6-6h12" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            New Post
+                        </button>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3 id="totalPosts">0</h3>
+                            <p>Total Posts</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="publishedPosts">0</h3>
+                            <p>Published</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="draftPosts">0</h3>
+                            <p>Drafts</p>
+                        </div>
+                    </div>
+
+                    <div class="posts-table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="postsTableBody">
+                                <!-- Posts will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- IPs Section -->
+                <section id="ipsSection" class="content-section">
+                    <div class="section-header">
+                        <h2>Manage Admin IPs</h2>
+                        <button class="btn-primary" id="addIPBtn">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M10 4v12m-6-6h12" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            Add IP
+                        </button>
+                    </div>
+
+                    <div class="ips-table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>IP Address</th>
+                                    <th>Name</th>
+                                    <th>Status</th>
+                                    <th>Added</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ipsTableBody">
+                                <!-- IPs will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </main>
+        </div>
+
+        <!-- Post Modal -->
+        <div class="modal" id="postModal">
+            <div class="modal-content large">
+                <div class="modal-header">
+                    <h3 id="modalTitle">Create New Post</h3>
+                    <button class="modal-close" id="closePostModal">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </button>
+                </div>
+                <form id="postForm">
+                    <input type="hidden" id="postId" />
+                    <div class="form-group">
+                        <label for="postTitle">Title</label>
+                        <input type="text" id="postTitle" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="postContent">Content</label>
+                        <textarea id="postContent" rows="10" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="postTags">Tags (comma separated)</label>
+                        <input type="text" id="postTags" placeholder="design, tech, web" />
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="postPublished" checked />
+                            <span>Publish immediately</span>
+                        </label>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" id="cancelPost">Cancel</button>
+                        <button type="submit" class="btn-primary">Save Post</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- IP Modal -->
+        <div class="modal" id="ipModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Add Admin IP</h3>
+                    <button class="modal-close" id="closeIPModal">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </button>
+                </div>
+                <form id="ipForm">
+                    <div class="form-group">
+                        <label for="ipAddress">IP Address</label>
+                        <input type="text" id="ipAddress" required placeholder="192.168.1.1" />
+                    </div>
+                    <div class="form-group">
+                        <label for="ipName">Name/Description</label>
+                        <input type="text" id="ipName" placeholder="Office Computer" />
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" id="cancelIP">Cancel</button>
+                        <button type="submit" class="btn-primary">Add IP</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>

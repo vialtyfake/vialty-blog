@@ -1,10 +1,11 @@
 {
   "name": "vialty-blog",
   "version": "1.0.0",
-  "description": "",
-  "main": "server.js",
+  "description": "Personal blog with admin system",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "vercel dev",
+    "build": "echo 'No build step required'",
+    "deploy": "vercel --prod"
   },
   "repository": {
     "type": "git",
@@ -13,12 +14,15 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
   "bugs": {
     "url": "https://github.com/vialtyfake/vialty-blog/issues"
   },
   "homepage": "https://github.com/vialtyfake/vialty-blog#readme",
   "dependencies": {
-    "nodemon": "^3.1.9"
+    "@vercel/kv": "^1.0.1",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "vercel": "^32.5.0"
   }
 }
