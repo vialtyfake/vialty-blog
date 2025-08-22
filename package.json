@@ -23,6 +23,6 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "vercel": "^32.5.0"
+    "vercel": "^46.0.2"
   }
 }
