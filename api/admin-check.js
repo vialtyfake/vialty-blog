@@ -1,13 +1,32 @@
+export const config = {
+  runtime: 'edge',
+};
+
 import { kv } from '@vercel/kv';
 
-export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+export default async function handler(request) {
+  const clientIP = request.headers.get('x-forwarded-for') || 
+                   request.headers.get('x-real-ip') || 
+                   'unknown';
   
-  const clientIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-  const normalizedIP = clientIP?.replace(/^::ffff:/, '') || '';
+  const normalizedIP = clientIP.split(',')[0].trim();
   
-  const adminIPs = await kv.get('admin_ips') || ['127.0.0.1', '::1'];
+  // Initialize admin IPs if not exists
+  let adminIPs = await kv.get('admin_ips');
+  if (!adminIPs) {
+    // Set default admin IPs (add your own IP here)
+    adminIPs = [
+      '127.0.0.1',
+      '::1',
+      // Add your IP here after checking what it is
+    ];
+    await kv.set('admin_ips', adminIPs);
+  }
+  
   const isAdmin = adminIPs.includes(normalizedIP);
   
-  return res.status(200).json({ isAdmin, ip: normalizedIP });
+  return new Response(JSON.stringify({ isAdmin, ip: normalizedIP }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  });
 }

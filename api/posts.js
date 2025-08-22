@@ -1,60 +1,71 @@
+export const config = {
+  runtime: 'edge',
+};
+
 import { kv } from '@vercel/kv';
-import { v4 as uuidv4 } from 'uuid';
 
-export default async function handler(req, res) {
-  // Enable CORS
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
+export default async function handler(request) {
+  const { searchParams } = new URL(request.url);
+  const method = request.method;
 
   try {
-    if (req.method === 'GET') {
-      // Get all published posts
+    if (method === 'GET') {
+      // Get all posts
       const posts = await kv.get('posts') || [];
-      const publishedPosts = posts.filter(post => post.is_published);
-      return res.status(200).json(publishedPosts);
+      const publishedPosts = posts.filter(post => post.is_published !== false);
+      
+      return new Response(JSON.stringify(publishedPosts), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
-    if (req.method === 'POST') {
+    if (method === 'POST') {
       // Check if admin
-      const clientIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-      const isAdmin = await checkAdminIP(clientIP);
+      const clientIP = request.headers.get('x-forwarded-for') || 
+                       request.headers.get('x-real-ip') || 
+                       'unknown';
       
-      if (!isAdmin) {
-        return res.status(403).json({ error: 'Unauthorized' });
+      const adminIPs = await kv.get('admin_ips') || ['127.0.0.1', '::1'];
+      const normalizedIP = clientIP.split(',')[0].trim();
+      
+      if (!adminIPs.includes(normalizedIP)) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 403,
+          headers: { 'Content-Type': 'application/json' },
+        });
       }
 
       // Create new post
-      const { title, content, tags } = req.body;
+      const body = await request.json();
       const newPost = {
-        id: uuidv4(),
-        title,
-        content,
-        tags: JSON.stringify(tags || []),
+        id: crypto.randomUUID(),
+        title: body.title,
+        content: body.content,
+        tags: JSON.stringify(body.tags || []),
         created_at: new Date().toISOString(),
-        is_published: true
+        is_published: body.is_published !== false,
       };
 
       const posts = await kv.get('posts') || [];
       posts.unshift(newPost);
       await kv.set('posts', posts);
 
-      return res.status(201).json(newPost);
+      return new Response(JSON.stringify(newPost), {
+        status: 201,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
-    return res.status(405).json({ error: 'Method not allowed' });
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+      headers: { 'Content-Type': 'application/json' },
+    });
   } catch (error) {
     console.error('API Error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
-}
-
-async function checkAdminIP(ip) {
-  const adminIPs = await kv.get('admin_ips') || ['127.0.0.1', '::1'];
-  const normalizedIP = ip?.replace(/^::ffff:/, '') || '';
-  return adminIPs.includes(normalizedIP);
 }
