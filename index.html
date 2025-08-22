@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VIALTY</title>
+    <link rel="stylesheet" href="globals.css" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <main class="mainframe">
+        <!-- Navigation Menu -->
+        <nav class="nav-menu" id="navMenu">
+            <div class="nav-header">
+                <h2>VIALTY</h2>
+                <button class="nav-close" id="navClose" aria-label="Close menu">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                </button>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#home" class="nav-link active">Home</a></li>
+                <li><a href="#blog" class="nav-link">Blog</a></li>
+                <li><a href="#about" class="nav-link">About</a></li>
+                <li><a href="#contact" class="nav-link">Contact</a></li>
+            </ul>
+        </nav>
+
+        <div class="content">
+            <header class="top-bar">
+                <button class="menu-button" id="menuButton" aria-label="Menu">
+                    <div class="menu-icon">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </button>
+                <div class="header-title">VIALTY</div>
+            </header>
+
+            <!-- Hero Section -->
+            <section class="hero-section" id="home">
+                <h1 class="main-heading glowing-text">OUT</h1>
+                <p class="hero-subtitle">Welcome to my digital space</p>
+            </section>
+
+            <!-- Blog Section -->
+            <section class="blog-section" id="blog">
+                <div class="section-header">
+                    <h2 class="section-title">Latest Posts</h2>
+                    <button class="new-post-btn" id="newPostBtn">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M10 4v12m-6-6h12" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        New Post
+                    </button>
+                </div>
+
+                <!-- Blog Posts Container -->
+                <div class="blog-grid" id="blogGrid">
+                    <!-- Posts will be dynamically added here -->
+                </div>
+            </section>
+        </div>
+
+        <!-- New Post Modal -->
+        <div class="modal" id="postModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Create New Post</h3>
+                    <button class="modal-close" id="modalClose" aria-label="Close modal">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </button>
+                </div>
+                <form class="post-form" id="postForm">
+                    <div class="form-group">
+                        <label for="postTitle">Title</label>
+                        <input type="text" id="postTitle" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="postContent">Content</label>
+                        <textarea id="postContent" rows="6" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="postTags">Tags (comma separated)</label>
+                        <input type="text" id="postTags" placeholder="design, tech, web" />
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" id="cancelPost">Cancel</button>
+                        <button type="submit" class="btn-primary">Publish</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
