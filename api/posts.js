@@ -1,12 +1,19 @@
-export const config = {
-  runtime: 'edge',
-};
-
 import { kv } from '@vercel/kv';
 
 export default async function handler(request) {
-  const { searchParams } = new URL(request.url);
   const method = request.method;
+
+  // Handle CORS
+  if (method === 'OPTIONS') {
+    return new Response(null, {
+      status: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      },
+    });
+  }
 
   try {
     if (method === 'GET') {
@@ -16,7 +23,10 @@ export default async function handler(request) {
       
       return new Response(JSON.stringify(publishedPosts), {
         status: 200,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        },
       });
     }
 
@@ -32,7 +42,10 @@ export default async function handler(request) {
       if (!adminIPs.includes(normalizedIP)) {
         return new Response(JSON.stringify({ error: 'Unauthorized' }), {
           status: 403,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+          },
         });
       }
 
@@ -53,19 +66,35 @@ export default async function handler(request) {
 
       return new Response(JSON.stringify(newPost), {
         status: 201,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        },
       });
     }
 
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      },
     });
   } catch (error) {
     console.error('API Error:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+    return new Response(JSON.stringify({ 
+      error: 'Internal server error',
+      details: error.message 
+    }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      },
     });
   }
 }
+
+export const config = {
+  runtime: 'edge',
+};

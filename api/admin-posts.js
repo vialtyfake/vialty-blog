@@ -1,36 +1,50 @@
-export const config = {
-  runtime: 'edge',
-};
-
 import { kv } from '@vercel/kv';
 
 export default async function handler(request) {
-  const { searchParams } = new URL(request.url);
+  const url = new URL(request.url);
   const method = request.method;
-  const postId = searchParams.get('id');
+  const postId = url.searchParams.get('id');
 
-  // Check if admin
-  const clientIP = request.headers.get('x-forwarded-for') || 
-                   request.headers.get('x-real-ip') || 
-                   'unknown';
-  
-  const adminIPs = await kv.get('admin_ips') || ['127.0.0.1', '::1'];
-  const normalizedIP = clientIP.split(',')[0].trim();
-  
-  if (!adminIPs.includes(normalizedIP)) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-      status: 403,
-      headers: { 'Content-Type': 'application/json' },
+  // Handle CORS
+  if (method === 'OPTIONS') {
+    return new Response(null, {
+      status: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      },
     });
   }
 
   try {
+    // Check if admin
+    const clientIP = request.headers.get('x-forwarded-for') || 
+                     request.headers.get('x-real-ip') || 
+                     'unknown';
+    
+    const adminIPs = await kv.get('admin_ips') || ['127.0.0.1', '::1'];
+    const normalizedIP = clientIP.split(',')[0].trim();
+    
+    if (!adminIPs.includes(normalizedIP)) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 403,
+        headers: { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        },
+      });
+    }
+
     if (method === 'GET') {
       // Get all posts (including unpublished)
       const posts = await kv.get('posts') || [];
       return new Response(JSON.stringify(posts), {
         status: 200,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        },
       });
     }
 
@@ -43,7 +57,10 @@ export default async function handler(request) {
       if (postIndex === -1) {
         return new Response(JSON.stringify({ error: 'Post not found' }), {
           status: 404,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+          },
         });
       }
 
@@ -60,7 +77,10 @@ export default async function handler(request) {
       
       return new Response(JSON.stringify(posts[postIndex]), {
         status: 200,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        },
       });
     }
 
@@ -72,19 +92,35 @@ export default async function handler(request) {
       
       return new Response(JSON.stringify({ success: true }), {
         status: 200,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        },
       });
     }
 
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      },
     });
   } catch (error) {
     console.error('API Error:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+    return new Response(JSON.stringify({ 
+      error: 'Internal server error',
+      details: error.message 
+    }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      },
     });
   }
 }
+
+export const config = {
+  runtime: 'edge',
+};
