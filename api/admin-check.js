@@ -12,6 +12,7 @@ export default async function handler(req, res) {
   const adminIPs = [
     '127.0.0.1',
     '::1',
+    '185.135.181.172',
     // Add your actual IP here after you see it
   ];
   
