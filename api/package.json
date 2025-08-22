@@ -18,6 +18,11 @@
     "url": "https://github.com/vialtyfake/vialty-blog/issues"
   },
   "homepage": "https://github.com/vialtyfake/vialty-blog#readme",
+  "dependencies": {
+    "@vercel/kv": "^1.0.1",
+    "redis": "^5.8.2",
+    "uuid": "^9.0.1"
+  },
   "devDependencies": {
     "vercel": "^32.0.1"
   }
