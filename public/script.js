@@ -58,18 +58,6 @@ async function loadBlogPosts() {
         const response = await fetch('/api/posts');
         blogPosts = await response.json();
         window.posts = blogPosts; // Store globally for search
-        
-        // Fetch view counts for each post
-        for (let post of blogPosts) {
-            try {
-                const viewResponse = await fetch(`/api/views?postId=${post.id}`);
-                const viewData = await viewResponse.json();
-                post.views = viewData.views || 0;
-            } catch (error) {
-                post.views = 0;
-            }
-        }
-        
         renderBlogPosts();
     } catch (error) {
         console.error('Error loading posts:', error);
@@ -253,8 +241,7 @@ function createPostElement(post) {
                 ${tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}
             </div>
         ` : ''}
-        <div class="post-footer" style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
-            <span style="color: #00d4ff; font-size: 0.9rem;">👁️ ${post.views || 0} views</span>
+        <div class="post-footer" style="display: flex; justify-content: flex-end; align-items: center; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
             <span style="color: #00ff88; font-size: 0.9rem;">Read more →</span>
         </div>
     `;
@@ -267,7 +254,7 @@ function createPostElement(post) {
     return article;
 }
 
-// Display single post with view tracking
+// Display single post WITHOUT view tracking
 function displaySinglePost(postId) {
     const post = blogPosts.find(p => p.id === postId);
     if (!post) return;
@@ -313,7 +300,6 @@ function displaySinglePost(postId) {
             </h1>
             <div style="color: #999; margin-bottom: 2rem; display: flex; gap: 2rem; flex-wrap: wrap; font-size: 0.95rem;">
                 <span>📅 ${formatDate(new Date(post.created_at))}</span>
-                <span id="viewCount-${postId}">👁️ Loading...</span>
                 ${post.author_ip && isAdmin ? `<span>📍 ${post.author_ip}</span>` : ''}
             </div>
             ${tags.length > 0 ? `
@@ -333,37 +319,8 @@ function displaySinglePost(postId) {
         </article>
     `;
     
-    // Track the view!
-    trackView(postId);
-    
     // Scroll to top of post
     window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-// Track view function
-async function trackView(postId) {
-    try {
-        const response = await fetch(`/api/views?postId=${postId}`, { method: 'POST' });
-        const data = await response.json();
-        
-        // Update the view count display
-        const viewElement = document.getElementById(`viewCount-${postId}`);
-        if (viewElement) {
-            viewElement.textContent = `👁️ ${data.views} views`;
-        }
-        
-        // Update in our local posts array
-        const post = blogPosts.find(p => p.id === postId);
-        if (post) {
-            post.views = data.views;
-        }
-    } catch (error) {
-        console.error('Error tracking view:', error);
-        const viewElement = document.getElementById(`viewCount-${postId}`);
-        if (viewElement) {
-            viewElement.textContent = `👁️ - views`;
-        }
-    }
 }
 
 // Back to list function
@@ -373,9 +330,6 @@ window.backToList = function() {
         singlePost.style.display = 'none';
     }
     blogGrid.style.display = 'grid';
-    
-    // Reload posts to show updated view counts
-    loadBlogPosts();
 }
 
 // Make displaySinglePost globally available for search results
