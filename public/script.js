@@ -19,6 +19,7 @@ window.posts = []; // Global for search
 let projects = [];
 
 const BLOB_BASE_URL = 'https://vialty-blog-images.vercel-blob.com';
+const BSKY_HANDLE = 'vialty.site';
 
 function resolveImageUrl(image) {
     if (!image) return '';
@@ -104,12 +105,20 @@ async function loadProjects() {
 async function loadBlueskyWidget() {
     if (!bskyEmbed) return;
     try {
+
+        const response = await fetch(`https://public.api.bsky.app/xrpc/app.bsky.feed.getAuthorFeed?actor=${BSKY_HANDLE}&limit=1`);
+
         const response = await fetch('https://public.api.bsky.app/xrpc/app.bsky.feed.getAuthorFeed?actor=vialtyfake&limit=1');
+
         const data = await response.json();
         const post = data.feed && data.feed[0]?.post;
         if (!post) return;
         const postId = post.uri.split('/').pop();
+
+        const url = encodeURIComponent(`https://bsky.app/profile/${BSKY_HANDLE}/post/${postId}`);
+
         const url = encodeURIComponent(`https://bsky.app/profile/vialtyfake/post/${postId}`);
+
         bskyEmbed.src = `https://embed.bsky.app/embed?url=${url}&theme=dark`;
     } catch (error) {
         console.error('Error loading Bluesky post:', error);
