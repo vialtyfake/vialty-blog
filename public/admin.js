@@ -51,6 +51,32 @@ async function checkAdminAccess() {
 
 // Initialize dashboard
 function initializeDashboard() {
+codex/redesign-side-navigation-bar-6q02bi
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+    const closeSidebar = () => {
+        sidebar.classList.remove('active');
+        sidebarOverlay.classList.remove('active');
+        document.body.classList.remove('sidebar-open');
+        sidebarToggle.setAttribute('aria-expanded', 'false');
+    };
+
+    sidebarToggle.addEventListener('click', () => {
+        const isActive = sidebar.classList.toggle('active');
+        sidebarOverlay.classList.toggle('active', isActive);
+        document.body.classList.toggle('sidebar-open', isActive);
+        sidebarToggle.setAttribute('aria-expanded', String(isActive));
+    });
+
+    sidebarOverlay.addEventListener('click', closeSidebar);
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && sidebar.classList.contains('active')) {
+            closeSidebar();
+        }
+
     const sidebar = document.querySelector('.sidebar');
     const sidebarToggle = document.getElementById('sidebarToggle');
     const sidebarOverlay = document.getElementById('sidebarOverlay');
@@ -63,6 +89,7 @@ function initializeDashboard() {
     sidebarOverlay.addEventListener('click', () => {
         sidebar.classList.remove('active');
         sidebarOverlay.classList.remove('active');
+main
     });
 
     // Navigation
@@ -72,8 +99,12 @@ function initializeDashboard() {
             const section = item.dataset.section;
             switchSection(section);
             if (window.innerWidth <= 1024) {
+ codex/redesign-side-navigation-bar-6q02bi
+                closeSidebar();
+
                 sidebar.classList.remove('active');
                 sidebarOverlay.classList.remove('active');
+main
             }
         });
     });

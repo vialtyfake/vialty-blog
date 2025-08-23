@@ -1,14 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
-    --admin-primary: #6366f1;
-    --admin-primary-light: #818cf8;
-    --admin-primary-dark: #4f46e5;
-    --admin-accent: #14b8a6;
-    --admin-bg: #0f0f15;
-    --admin-surface: #1a1a24;
-    --admin-surface-light: #232333;
-    --admin-border: rgba(255, 255, 255, 0.06);
+    --admin-primary: #ff3b3b;
+    --admin-primary-light: #ffa63b;
+    --admin-primary-dark: #8b0000;
+    --admin-accent: #ff8c00;
+    --admin-bg: #000000;
+    --admin-surface: #1a0000;
+    --admin-surface-light: #2a0a00;
+    --admin-border: rgba(255, 255, 255, 0.1);
     --admin-text: #f1f5f9;
     --admin-text-secondary: #94a3b8;
     --admin-text-muted: #64748b;
@@ -31,6 +31,10 @@ body {
     min-height: 100vh;
     font-size: 14px;
     line-height: 1.6;
+}
+
+body.sidebar-open {
+    overflow: hidden;
 }
 
 .admin-container {
@@ -131,7 +135,7 @@ body {
 /* Sidebar */
 .sidebar {
     width: var(--sidebar-width);
-    background: var(--admin-surface);
+    background: linear-gradient(180deg, var(--admin-primary-dark), var(--admin-bg));
     border-right: 1px solid var(--admin-border);
     display: flex;
     flex-direction: column;
@@ -139,29 +143,51 @@ body {
     height: 100vh;
     z-index: 200;
     transform: translateX(0);
+ codex/redesign-side-navigation-bar-6q02bi
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
+    opacity: 1;
+
     transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+ main
 }
 
 .sidebar-overlay {
     position: fixed;
     inset: 0;
+codex/redesign-side-navigation-bar-6q02bi
+    background: rgba(0, 0, 0, 0.6);
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+
     background: rgba(0, 0, 0, 0.5);
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease;
+ main
     z-index: 150;
 }
 
 .sidebar-overlay.active {
     opacity: 1;
     pointer-events: all;
+codex/redesign-side-navigation-bar-6q02bi
+    visibility: visible;
+    transition: opacity 0.3s ease;
+
+ main
 }
 
 .sidebar-toggle {
     position: fixed;
     top: 20px;
     left: 20px;
+ codex/redesign-side-navigation-bar-6q02bi
+    background: linear-gradient(135deg, var(--admin-primary), var(--admin-accent));
+
     background: var(--admin-primary);
+ main
     border: none;
     border-radius: 8px;
     padding: 10px;
@@ -170,11 +196,19 @@ body {
     flex-direction: column;
     gap: 4px;
     z-index: 250;
+ codex/redesign-side-navigation-bar-6q02bi
+    transition: filter 0.3s ease;
+}
+
+.sidebar-toggle:hover {
+    filter: brightness(1.1);
+
     transition: background 0.3s ease;
 }
 
 .sidebar-toggle:hover {
     background: var(--admin-primary-light);
+ main
 }
 
 .sidebar-toggle .bar {
@@ -234,6 +268,20 @@ body {
     position: relative;
     overflow: hidden;
     transition: color 0.3s ease;
+ codex/redesign-side-navigation-bar-6q02bi
+}
+
+.nav-item::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--admin-primary), var(--admin-accent));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    opacity: 0.2;
+    z-index: -1;
+
 }
 
 .nav-item::after {
@@ -254,15 +302,23 @@ body {
 .nav-item:hover::after {
     transform: translateX(0);
     opacity: 1;
+ main
 }
 
+.nav-item:hover,
 .nav-item.active {
     color: var(--admin-text);
 }
 
+codex/redesign-side-navigation-bar-6q02bi
+.nav-item:hover::after,
+.nav-item.active::after {
+    transform: scaleX(1);
+
 .nav-item.active::after {
     transform: translateX(0);
     opacity: 1;
+main
 }
 
 .sidebar-footer {
@@ -306,6 +362,7 @@ body {
         transform: translateY(0);
     }
 }
+
 
 .section-header {
     display: flex;
@@ -694,12 +751,23 @@ body {
 /* Responsive */
 @media (max-width: 1024px) {
     .sidebar {
+ codex/redesign-side-navigation-bar-6q02bi
+        transform: translateX(-100%) scale(0.9);
+        opacity: 0;
+    }
+
+    .sidebar.active {
+        transform: translateX(0) scale(1);
+        opacity: 1;
+        box-shadow: 20px 0 40px rgba(0, 0, 0, 0.6);
+
         transform: translateX(-100%);
     }
 
     .sidebar.active {
         transform: translateX(0);
         box-shadow: 12px 0 30px rgba(0, 0, 0, 0.4);
+ main
     }
 
     .sidebar-toggle {
