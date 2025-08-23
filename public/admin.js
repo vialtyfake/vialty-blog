@@ -51,6 +51,7 @@ async function checkAdminAccess() {
 
 // Initialize dashboard
 function initializeDashboard() {
+codex/redesign-side-navigation-bar-6q02bi
     const sidebar = document.getElementById('sidebar');
     const sidebarToggle = document.getElementById('sidebarToggle');
     const sidebarOverlay = document.getElementById('sidebarOverlay');
@@ -75,6 +76,20 @@ function initializeDashboard() {
         if (e.key === 'Escape' && sidebar.classList.contains('active')) {
             closeSidebar();
         }
+
+    const sidebar = document.querySelector('.sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+    sidebarToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('active');
+        sidebarOverlay.classList.toggle('active');
+    });
+
+    sidebarOverlay.addEventListener('click', () => {
+        sidebar.classList.remove('active');
+        sidebarOverlay.classList.remove('active');
+main
     });
 
     // Navigation
@@ -84,7 +99,12 @@ function initializeDashboard() {
             const section = item.dataset.section;
             switchSection(section);
             if (window.innerWidth <= 1024) {
+ codex/redesign-side-navigation-bar-6q02bi
                 closeSidebar();
+
+                sidebar.classList.remove('active');
+                sidebarOverlay.classList.remove('active');
+main
             }
         });
     });
