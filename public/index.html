@@ -22,9 +22,7 @@
             <ul class="nav-links">
                 <li><a href="#home" class="nav-link active">Home</a></li>
                 <li><a href="#blog" class="nav-link">Blog</a></li>
-                <li><a href="#projects" class="nav-link">Projects</a></li>
                 <li><a href="/about" class="nav-link external-link">About</a></li>
-                <li><a href="#contact" class="nav-link">Contact</a></li>
                 <li><a href="/security" class="nav-link external-link">Security</a></li>
             </ul>
         </nav>
@@ -45,31 +43,8 @@
             <section class="hero-section" id="home">
                 <div class="hero-header">
                     <h1 class="main-heading">VIALTY</h1>
-                    <p class="hero-subtitle">est. mid-2024</p>
                 </div>
             </section>
-
-            <!-- Projects Section -->
-            <section class="projects-section" id="projects">
-                <div class="section-header">
-                    <h2 class="section-title">Projects</h2>
-                </div>
-                <div class="projects-grid" id="projectsGrid">
-                    <!-- Projects will be loaded here -->
-                </div>
-            </section>
-
-            <!-- Search Bar -->
-            <div class="search-container">
-                <div class="search-wrapper">
-                    <svg class="search-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                        <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="2"/>
-                        <path d="M14 14l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
-                    <input type="text" id="search-input" placeholder="Search posts..." class="search-input">
-                </div>
-                <div id="search-results" class="search-results"></div>
-            </div>
 
             <!-- Blog Section -->
             <section class="blog-section" id="blog">
@@ -105,20 +80,6 @@
             </div>
         </div>
 
-        <!-- Project View Modal -->
-        <div class="post-modal" id="projectViewModal">
-            <div class="post-modal-overlay" onclick="closeProjectView()"></div>
-            <div class="post-modal-content">
-                <button class="post-modal-close" onclick="closeProjectView()">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
-                </button>
-                <div class="post-modal-body" id="projectModalBody">
-                    <!-- Project content will be loaded here -->
-                </div>
-            </div>
-        </div>
 
         <!-- New Post Modal -->
         <div class="modal" id="postModal">
