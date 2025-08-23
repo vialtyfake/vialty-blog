@@ -52,13 +52,13 @@ export default async function handler(req, res) {
     if (method === 'GET') {
       const { blobs } = await list({ token, prefix: `${STORE}/` });
 
+      // Return both the file name and the public URL so the
+      // admin panel can display and select images.
       const images = blobs.map(b => ({
         name: b.pathname.replace(`${STORE}/`, ''),
         url: b.url
       }));
 
-      const images = blobs.map(b => b.pathname.replace(`${STORE}/`, ''));
-main
       return res.status(200).json(images);
     }
 
