@@ -51,10 +51,14 @@ export default async function handler(req, res) {
 
     if (method === 'GET') {
       const { blobs } = await list({ token, prefix: `${STORE}/` });
+
       const images = blobs.map(b => ({
         name: b.pathname.replace(`${STORE}/`, ''),
         url: b.url
       }));
+
+      const images = blobs.map(b => b.pathname.replace(`${STORE}/`, ''));
+main
       return res.status(200).json(images);
     }
 
