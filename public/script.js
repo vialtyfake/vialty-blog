@@ -126,21 +126,23 @@ function setupEventListeners() {
 
     navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
-            // Don't prevent default for admin link
-            if (link.getAttribute('href') === '/admin') {
+            const href = link.getAttribute('href');
+
+            // Allow default navigation for external links and admin panel
+            if (href === '/admin' || link.classList.contains('external-link')) {
                 return;
             }
-            
+
             e.preventDefault();
-            const targetId = link.getAttribute('href').substring(1);
+            const targetId = href.substring(1);
             closeNav();
-            
+
             // Smooth scroll to section
             const targetSection = document.getElementById(targetId);
             if (targetSection) {
                 targetSection.scrollIntoView({ behavior: 'smooth' });
             }
-            
+
             // Update active link
             navLinks.forEach(l => l.classList.remove('active'));
             link.classList.add('active');
