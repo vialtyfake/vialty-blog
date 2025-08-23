@@ -3,10 +3,23 @@
     --primary-glow: #00d4ff;
     --secondary-glow: #ff00ff;
     --glass-bg: rgba(255, 255, 255, 0.03);
+    --glass-bg-hover: rgba(255, 255, 255, 0.05);
+    --hover-bg: rgba(255, 255, 255, 0.08);
     --glass-border: rgba(255, 255, 255, 0.1);
     --text-primary: #ffffff;
     --text-secondary: rgba(255, 255, 255, 0.7);
+    --background: #000000;
     --blur-amount: 20px;
+}
+
+[data-theme="light"] {
+    --glass-bg: rgba(0, 0, 0, 0.03);
+    --glass-bg-hover: rgba(0, 0, 0, 0.05);
+    --hover-bg: rgba(0, 0, 0, 0.08);
+    --glass-border: rgba(0, 0, 0, 0.1);
+    --text-primary: #000000;
+    --text-secondary: rgba(0, 0, 0, 0.7);
+    --background: #ffffff;
 }
 
 /* Reset */
@@ -18,8 +31,8 @@
 
 /* Main container */
 .mainframe {
-    background: #000000;
-    background-image: 
+    background: var(--background);
+    background-image:
         radial-gradient(circle at 20% 50%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
         radial-gradient(circle at 80% 80%, rgba(255, 0, 255, 0.1) 0%, transparent 50%);
     min-height: 100vh;
@@ -66,6 +79,22 @@
     opacity: 0.9;
 }
 
+/* Theme selector */
+.theme-selector {
+    margin-left: auto;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    border-radius: 12px;
+    padding: 6px 12px;
+    font-family: "Inter", sans-serif;
+}
+
+.theme-selector option {
+    background: var(--background);
+    color: var(--text-primary);
+}
+
 /* Menu button */
 .menu-button {
     width: 50px;
@@ -83,7 +112,7 @@
 }
 
 .menu-button:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--hover-bg);
     border-color: var(--primary-glow);
     box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
 }
@@ -274,7 +303,7 @@
 .search-input:focus {
     outline: none;
     border-color: var(--primary-glow);
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--glass-bg-hover);
     box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
 }
 
@@ -299,7 +328,7 @@
 }
 
 .search-result:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--hover-bg);
     border-color: var(--primary-glow);
     transform: translateX(5px);
 }
@@ -539,8 +568,8 @@
 
 .post-tag {
     padding: 6px 12px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--glass-bg-hover);
+    border: 1px solid var(--glass-border);
     border-radius: 8px;
     font-size: 12px;
     color: var(--text-secondary);
@@ -661,7 +690,7 @@
 }
 
 .post-modal-body::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--scrollbar-track);
 }
 
 .post-modal-body::-webkit-scrollbar-thumb {
