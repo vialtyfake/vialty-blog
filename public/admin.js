@@ -308,11 +308,15 @@ async function handleProjectSubmit(e) {
         } else {
             let errorMessage = 'Failed to save project';
             try {
-                const err = await response.json();
-                errorMessage = err.error || errorMessage;
-            } catch (e) {
                 const text = await response.text();
-                if (text) errorMessage = text;
+                try {
+                    const err = JSON.parse(text);
+                    errorMessage = err.error || errorMessage;
+                } catch {
+                    if (text) errorMessage = text;
+                }
+            } catch {
+                // ignore
             }
             showNotification(errorMessage, 'error');
         }
