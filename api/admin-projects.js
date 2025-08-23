@@ -6,7 +6,11 @@ export default async function handler(req, res) {
 
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
+codex/add-projects-grid-with-admin-management-l7za55
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+=======
   res.setHeader('Access-Control-Allow-Methods', 'GET, PUT, DELETE, OPTIONS');
+main
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (method === 'OPTIONS') {
@@ -33,6 +37,28 @@ export default async function handler(req, res) {
       return res.status(200).json(projects);
     }
 
+codex/add-projects-grid-with-admin-management-l7za55
+    if (method === 'POST') {
+      const { title, role, stack, link, blurb, image } = req.body;
+      const newProject = {
+        id: Date.now().toString(),
+        title,
+        role,
+        stack,
+        link,
+        blurb,
+        image,
+        created_at: new Date().toISOString()
+      };
+
+      const projectsStr = await client.get('projects');
+      const projects = projectsStr ? JSON.parse(projectsStr) : [];
+      projects.unshift(newProject);
+      await client.set('projects', JSON.stringify(projects));
+      return res.status(201).json(newProject);
+    }
+
+main
     if (method === 'PUT' && query.id) {
       const { title, role, stack, link, blurb, image } = req.body;
       const projectsStr = await client.get('projects');
