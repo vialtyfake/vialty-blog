@@ -6,7 +6,7 @@ export default async function handler(req, res) {
 
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (method === 'OPTIONS') {
@@ -20,54 +20,6 @@ export default async function handler(req, res) {
       const projectsStr = await client.get('projects');
       const projects = projectsStr ? JSON.parse(projectsStr) : [];
       return res.status(200).json(projects);
-    }
-
-    if (method === 'POST') {
-      const clientIP = req.headers['x-forwarded-for'] ||
-                       req.headers['x-real-ip'] ||
-                       'unknown';
-      const normalizedIP = clientIP.split(',')[0].trim();
-
-      const adminIPsStr = await client.get('admin_ips');
-      const adminIPs = adminIPsStr ? JSON.parse(adminIPsStr) : ['127.0.0.1', '::1'];
-
-      if (!adminIPs.includes(normalizedIP)) {
-        return res.status(403).json({ error: 'Unauthorized' });
-      }
-
-codex/add-projects-grid-with-admin-management-4ol0kk
-      let body = req.body;
-      if (typeof body === 'string') {
-        try {
-          body = JSON.parse(body);
-        } catch (e) {
-          return res.status(400).json({ error: 'Invalid JSON' });
-        }
-      }
-      const { title, role, stack, link, blurb, image } = body || {};
-      if (!title) {
-        return res.status(400).json({ error: 'Title is required' });
-      }
-
-      const { title, role, stack, link, blurb, image } = req.body;
-main
-      const newProject = {
-        id: Date.now().toString(),
-        title,
-        role,
-        stack,
-        link,
-        blurb,
-        image,
-        created_at: new Date().toISOString()
-      };
-
-      const projectsStr = await client.get('projects');
-      const projects = projectsStr ? JSON.parse(projectsStr) : [];
-      projects.unshift(newProject);
-      await client.set('projects', JSON.stringify(projects));
-
-      return res.status(201).json(newProject);
     }
 
     return res.status(405).json({ error: 'Method not allowed' });
