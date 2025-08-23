@@ -1,38 +1,5 @@
 /* About page styles */
 
-.about-section {
-    padding: 120px 30px 60px;
-}
-
-.about-container {
-    max-width: 800px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 60px;
-}
-
-.about-section h1 {
-    font-family: "Inter", sans-serif;
-    font-weight: 800;
-    font-size: 48px;
-    color: var(--text-primary);
-    margin-bottom: 24px;
-}
-
-.about-section h2 {
-    font-family: "Inter", sans-serif;
-    font-weight: 700;
-    font-size: 28px;
-    color: var(--text-primary);
-    margin-bottom: 16px;
-}
-
-.about-section p {
-    color: var(--text-secondary);
-    line-height: 1.7;
-}
-
 .quick-facts ul {
     padding-left: 20px;
     color: var(--text-secondary);
@@ -87,10 +54,4 @@
     border-color: var(--primary-glow);
     color: var(--primary-glow);
     box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
-}
-
-@media (max-width: 600px) {
-    .about-section {
-        padding: 100px 20px 40px;
-    }
 }
