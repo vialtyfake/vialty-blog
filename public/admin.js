@@ -5,6 +5,7 @@ let posts = [];
 let adminIPs = [];
 let projects = [];
 let projectImages = [];
+let images = [];
 
 // Initialize admin panel
 document.addEventListener('DOMContentLoaded', async () => {
@@ -32,6 +33,7 @@ async function checkAdminAccess() {
             initializeDashboard();
             await loadPosts();
             await loadProjects();
+            await loadImages();
             await loadAdminIPs();
         } else {
             // Show access denied
@@ -84,7 +86,27 @@ function initializeDashboard() {
         closeProjectModal();
     });
     document.getElementById('projectForm').addEventListener('submit', handleProjectSubmit);
-    
+
+    // Image modal
+    document.getElementById('newImageBtn').addEventListener('click', () => {
+        openImageModal();
+    });
+    document.getElementById('closeImageModal').addEventListener('click', () => {
+        closeImageModal();
+    });
+    document.getElementById('cancelImage').addEventListener('click', () => {
+        closeImageModal();
+    });
+    document.getElementById('imageForm').addEventListener('submit', handleImageSubmit);
+
+    document.getElementById('closeRenameModal').addEventListener('click', () => {
+        closeRenameModal();
+    });
+    document.getElementById('cancelRename').addEventListener('click', () => {
+        closeRenameModal();
+    });
+    document.getElementById('renameForm').addEventListener('submit', handleRenameSubmit);
+
     // IP modal
     document.getElementById('addIPBtn').addEventListener('click', () => {
         openIPModal();
@@ -118,6 +140,9 @@ function switchSection(section) {
         document.getElementById('postsSection').classList.add('active');
     } else if (section === 'projects') {
         document.getElementById('projectsSection').classList.add('active');
+    } else if (section === 'images') {
+        document.getElementById('imagesSection').classList.add('active');
+        loadImages();
     } else if (section === 'ips') {
         document.getElementById('ipsSection').classList.add('active');
     }
@@ -269,6 +294,48 @@ async function loadProjectImages() {
     }
 }
 
+async function loadImages() {
+    try {
+        const response = await fetch('/api/admin-images');
+        if (!response.ok) throw new Error('Failed to load images');
+        images = await response.json();
+        const tbody = document.getElementById('imagesTableBody');
+        tbody.innerHTML = '';
+
+        if (images.length === 0) {
+            const row = document.createElement('tr');
+            row.innerHTML = `<td colspan="3" style="text-align:center;padding:20px;color:var(--admin-text-secondary);">No images found</td>`;
+            tbody.appendChild(row);
+            return;
+        }
+
+        images.forEach(img => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><img src="/images/${img}" alt="${escapeHtml(img)}" class="image-thumb"/></td>
+                <td>${escapeHtml(img)}</td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn-icon" onclick="openRenameModal('${img}')" title="Rename">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M11.333 2A1.886 1.886 0 0114 4.667l-9 9-3.667 1 1-3.667 9-9z" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                        </button>
+                        <button class="btn-icon delete" onclick="deleteImage('${img}')" title="Delete">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M2 4h12M6 4V2h4v2m-5 2v7a1 1 0 001 1h4a1 1 0 001-1V6H5z" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                        </button>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    } catch (error) {
+        console.error('Error loading images:', error);
+    }
+}
+
 async function openProjectModal(projectId = null) {
     await loadProjectImages();
     const modal = document.getElementById('projectModal');
@@ -363,6 +430,128 @@ window.deleteProject = async function(projectId) {
         console.error('Error deleting project:', error);
         showNotification('Failed to delete project', 'error');
     }
+}
+
+function openImageModal() {
+    const modal = document.getElementById('imageModal');
+    document.getElementById('imageForm').reset();
+    modal.classList.add('active');
+}
+
+function closeImageModal() {
+    document.getElementById('imageModal').classList.remove('active');
+}
+
+async function handleImageSubmit(e) {
+    e.preventDefault();
+    const fileInput = document.getElementById('imageFile');
+    const nameInput = document.getElementById('imageName').value.trim();
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    try {
+        const dataUrl = await optimizeImage(file);
+        const name = nameInput || file.name;
+        const response = await fetch('/api/admin-images', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, data: dataUrl })
+        });
+        if (!response.ok) throw new Error('Upload failed');
+        closeImageModal();
+        await loadImages();
+        await loadProjectImages();
+        showNotification('Image uploaded successfully', 'success');
+    } catch (error) {
+        console.error('Error uploading image:', error);
+        showNotification('Failed to upload image', 'error');
+    }
+}
+
+function openRenameModal(name) {
+    document.getElementById('oldImageName').value = name;
+    document.getElementById('newImageName').value = name;
+    document.getElementById('renameImageModal').classList.add('active');
+}
+
+function closeRenameModal() {
+    document.getElementById('renameImageModal').classList.remove('active');
+}
+
+async function handleRenameSubmit(e) {
+    e.preventDefault();
+    const oldName = document.getElementById('oldImageName').value;
+    const newName = document.getElementById('newImageName').value;
+    try {
+        const response = await fetch('/api/admin-images', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ oldName, newName })
+        });
+        if (!response.ok) throw new Error('Rename failed');
+        closeRenameModal();
+        await loadImages();
+        await loadProjectImages();
+        showNotification('Image renamed successfully', 'success');
+    } catch (error) {
+        console.error('Error renaming image:', error);
+        showNotification('Failed to rename image', 'error');
+    }
+}
+
+window.openRenameModal = function(name) {
+    openRenameModal(name);
+};
+
+window.deleteImage = async function(name) {
+    if (!confirm('Are you sure you want to delete this image?')) return;
+    try {
+        const response = await fetch(`/api/admin-images?name=${encodeURIComponent(name)}`, {
+            method: 'DELETE'
+        });
+        if (!response.ok) throw new Error('Delete failed');
+        await loadImages();
+        await loadProjectImages();
+        showNotification('Image deleted successfully', 'success');
+    } catch (error) {
+        console.error('Error deleting image:', error);
+        showNotification('Failed to delete image', 'error');
+    }
+};
+
+function optimizeImage(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let { width, height } = img;
+                const maxSize = 1200;
+                if (width > height && width > maxSize) {
+                    height = Math.round(height * (maxSize / width));
+                    width = maxSize;
+                } else if (height > maxSize) {
+                    width = Math.round(width * (maxSize / height));
+                    height = maxSize;
+                }
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                canvas.toBlob(blob => {
+                    const reader2 = new FileReader();
+                    reader2.onload = () => resolve(reader2.result);
+                    reader2.onerror = reject;
+                    reader2.readAsDataURL(blob);
+                }, 'image/jpeg', 0.8);
+            };
+            img.onerror = reject;
+            img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
 }
 
 // Load admin IPs

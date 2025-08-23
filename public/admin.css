@@ -318,7 +318,8 @@ body {
 /* Tables */
 .posts-table-container,
 .ips-table-container,
-.projects-table-container {
+.projects-table-container,
+.images-table-container {
     background: var(--admin-surface);
     border-radius: 16px;
     overflow: hidden;
@@ -356,6 +357,13 @@ body {
 
 .data-table tbody tr:hover {
     background: var(--admin-surface-light);
+}
+
+.image-thumb {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
 }
 
 .post-title-cell .post-title {
