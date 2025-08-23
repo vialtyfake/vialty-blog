@@ -7,6 +7,10 @@
     {
       "source": "/about",
       "destination": "/about.html"
+    },
+    {
+      "source": "/security",
+      "destination": "/security.html"
     }
   ],
   "functions": {
