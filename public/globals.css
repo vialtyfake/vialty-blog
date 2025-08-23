@@ -54,3 +54,23 @@ html {
     outline: 2px solid #00d4ff;
     outline-offset: 2px;
 }
+
+/* Footer */
+.site-footer {
+    background: var(--glass-bg, #1a1a1a);
+    border-top: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+    text-align: center;
+    padding: 20px;
+    margin-top: 40px;
+    font-size: 14px;
+    color: var(--text-secondary, #94a3b8);
+}
+
+.site-footer a {
+    color: var(--text-primary, #f1f5f9);
+    text-decoration: none;
+}
+
+.site-footer a:hover {
+    color: var(--primary-glow, #00d4ff);
+}
