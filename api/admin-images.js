@@ -65,12 +65,18 @@ export default async function handler(req, res) {
     }
 
     if (method === 'DELETE') {
-      const { name } = query;
-      if (!name) return res.status(400).json({ error: 'Name required' });
+      const nameParam = Array.isArray(query?.name) ? query.name[0] : query?.name;
+      if (!nameParam) return res.status(400).json({ error: 'Name required' });
+
+      const safeName = decodeURIComponent(nameParam).replace(/[^a-zA-Z0-9._-]/g, '');
+      const filePath = path.join(imagesDir, safeName);
+
       try {
-        await fs.unlink(path.join(imagesDir, name));
+        await fs.unlink(filePath);
       } catch (err) {
-        return res.status(404).json({ error: 'File not found' });
+        return res.status(err.code === 'ENOENT' ? 404 : 500).json({
+          error: err.code === 'ENOENT' ? 'File not found' : 'Failed to delete file'
+        });
       }
       return res.status(200).json({ success: true });
     }
