@@ -18,6 +18,16 @@
     --sidebar-width: 260px;
 }
 
+[data-theme="light"] {
+    --admin-bg: #f8fafc;
+    --admin-surface: #ffffff;
+    --admin-surface-light: #f1f5f9;
+    --admin-border: rgba(0, 0, 0, 0.1);
+    --admin-text: #0f172a;
+    --admin-text-secondary: #334155;
+    --admin-text-muted: #64748b;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -143,6 +153,9 @@ body {
 .sidebar-header {
     padding: 24px;
     border-bottom: 1px solid var(--admin-border);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .sidebar-header h1 {
@@ -165,6 +178,20 @@ body {
     font-weight: 600;
     letter-spacing: 0.5px;
     text-transform: uppercase;
+}
+
+.theme-selector {
+    background: var(--admin-surface-light);
+    border: 1px solid var(--admin-border);
+    color: var(--admin-text);
+    border-radius: 6px;
+    padding: 6px;
+    font-family: inherit;
+}
+
+.theme-selector option {
+    background: var(--admin-surface);
+    color: var(--admin-text);
 }
 
 .sidebar-nav {

@@ -1,6 +1,23 @@
 /* Global styles and fonts */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;800;900&display=swap');
 
+/* Theme Variables */
+:root {
+    --scrollbar-track: rgba(255, 255, 255, 0.05);
+    --scrollbar-thumb: rgba(255, 255, 255, 0.1);
+    --scrollbar-thumb-hover: rgba(255, 255, 255, 0.2);
+    --selection-bg: rgba(0, 212, 255, 0.3);
+    --selection-color: white;
+}
+
+[data-theme="light"] {
+    --scrollbar-track: rgba(0, 0, 0, 0.1);
+    --scrollbar-thumb: rgba(0, 0, 0, 0.2);
+    --scrollbar-thumb-hover: rgba(0, 0, 0, 0.3);
+    --selection-bg: rgba(0, 212, 255, 0.4);
+    --selection-color: black;
+}
+
 /* CSS Reset */
 html, body {
     margin: 0;
@@ -17,22 +34,22 @@ html, body {
 }
 
 ::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--scrollbar-track);
 }
 
 ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--scrollbar-thumb);
     border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--scrollbar-thumb-hover);
 }
 
 /* Selection styling */
 ::selection {
-    background: rgba(0, 212, 255, 0.3);
-    color: white;
+    background: var(--selection-bg);
+    color: var(--selection-color);
 }
 
 /* Smooth scrolling */
