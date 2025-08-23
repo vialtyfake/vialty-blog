@@ -1,14 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
-    --admin-primary: #6366f1;
-    --admin-primary-light: #818cf8;
-    --admin-primary-dark: #4f46e5;
-    --admin-accent: #14b8a6;
-    --admin-bg: #0f0f15;
-    --admin-surface: #1a1a24;
-    --admin-surface-light: #232333;
-    --admin-border: rgba(255, 255, 255, 0.06);
+    --admin-primary: #ff3b3b;
+    --admin-primary-light: #ffa63b;
+    --admin-primary-dark: #8b0000;
+    --admin-accent: #ff8c00;
+    --admin-bg: #000000;
+    --admin-surface: #1a0000;
+    --admin-surface-light: #2a0a00;
+    --admin-border: rgba(255, 255, 255, 0.1);
     --admin-text: #f1f5f9;
     --admin-text-secondary: #94a3b8;
     --admin-text-muted: #64748b;
@@ -31,6 +31,10 @@ body {
     min-height: 100vh;
     font-size: 14px;
     line-height: 1.6;
+}
+
+body.sidebar-open {
+    overflow: hidden;
 }
 
 .admin-container {
@@ -131,13 +135,58 @@ body {
 /* Sidebar */
 .sidebar {
     width: var(--sidebar-width);
-    background: var(--admin-surface);
+    background: linear-gradient(180deg, var(--admin-primary-dark), var(--admin-bg));
     border-right: 1px solid var(--admin-border);
     display: flex;
     flex-direction: column;
     position: fixed;
     height: 100vh;
-    z-index: 100;
+    z-index: 200;
+    transform: translateX(0);
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
+    opacity: 1;
+}
+
+.sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 150;
+}
+
+.sidebar-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.sidebar-toggle {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: linear-gradient(135deg, var(--admin-primary), var(--admin-accent));
+    border: none;
+    border-radius: 8px;
+    padding: 10px;
+    cursor: pointer;
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    z-index: 250;
+    transition: filter 0.3s ease;
+}
+
+.sidebar-toggle:hover {
+    filter: brightness(1.1);
+}
+
+.sidebar-toggle .bar {
+    width: 24px;
+    height: 2px;
+    background: white;
+    border-radius: 1px;
 }
 
 .sidebar-header {
@@ -184,35 +233,34 @@ body {
     color: var(--admin-text-secondary);
     text-decoration: none;
     border-radius: 10px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     margin-bottom: 4px;
     font-weight: 500;
     font-size: 14px;
     position: relative;
+    overflow: hidden;
+    transition: color 0.3s ease;
 }
 
-.nav-item:hover {
-    background: var(--admin-surface-light);
-    color: var(--admin-text);
-    transform: translateX(4px);
-}
-
-.nav-item.active {
-    background: linear-gradient(135deg, var(--admin-primary), var(--admin-primary-light));
-    color: white;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-}
-
-.nav-item.active::before {
+.nav-item::after {
     content: '';
     position: absolute;
-    left: -16px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 4px;
-    height: 24px;
-    background: var(--admin-primary);
-    border-radius: 0 4px 4px 0;
+    inset: 0;
+    background: linear-gradient(135deg, var(--admin-primary), var(--admin-accent));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    opacity: 0.2;
+    z-index: -1;
+}
+
+.nav-item:hover,
+.nav-item.active {
+    color: var(--admin-text);
+}
+
+.nav-item:hover::after,
+.nav-item.active::after {
+    transform: scaleX(1);
 }
 
 .sidebar-footer {
@@ -234,6 +282,7 @@ body {
     margin-left: var(--sidebar-width);
     max-width: 1400px;
     width: 100%;
+    transition: margin-left 0.3s ease;
 }
 
 .content-section {
@@ -643,14 +692,20 @@ body {
 /* Responsive */
 @media (max-width: 1024px) {
     .sidebar {
-        transform: translateX(-100%);
-        transition: transform 0.3s ease;
+        transform: translateX(-100%) scale(0.9);
+        opacity: 0;
     }
-    
+
     .sidebar.active {
-        transform: translateX(0);
+        transform: translateX(0) scale(1);
+        opacity: 1;
+        box-shadow: 20px 0 40px rgba(0, 0, 0, 0.6);
     }
-    
+
+    .sidebar-toggle {
+        display: flex;
+    }
+
     .main-content {
         margin-left: 0;
         padding: 24px;

@@ -51,12 +51,33 @@ async function checkAdminAccess() {
 
 // Initialize dashboard
 function initializeDashboard() {
+    const sidebar = document.querySelector('.sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+    sidebarToggle.addEventListener('click', () => {
+        const isActive = sidebar.classList.toggle('active');
+        sidebarOverlay.classList.toggle('active', isActive);
+        document.body.classList.toggle('sidebar-open', isActive);
+    });
+
+    sidebarOverlay.addEventListener('click', () => {
+        sidebar.classList.remove('active');
+        sidebarOverlay.classList.remove('active');
+        document.body.classList.remove('sidebar-open');
+    });
+
     // Navigation
     document.querySelectorAll('.nav-item[data-section]').forEach(item => {
         item.addEventListener('click', (e) => {
             e.preventDefault();
             const section = item.dataset.section;
             switchSection(section);
+            if (window.innerWidth <= 1024) {
+                sidebar.classList.remove('active');
+                sidebarOverlay.classList.remove('active');
+                document.body.classList.remove('sidebar-open');
+            }
         });
     });
     
