@@ -3,6 +3,7 @@ let isAdmin = false;
 let currentUserIP = '';
 let posts = [];
 let adminIPs = [];
+let projects = [];
 
 // Initialize admin panel
 document.addEventListener('DOMContentLoaded', async () => {
@@ -29,6 +30,7 @@ async function checkAdminAccess() {
             // Initialize dashboard
             initializeDashboard();
             await loadPosts();
+            await loadProjects();
             await loadAdminIPs();
         } else {
             // Show access denied
@@ -69,6 +71,18 @@ function initializeDashboard() {
     });
     
     document.getElementById('postForm').addEventListener('submit', handlePostSubmit);
+
+    // Project modal
+    document.getElementById('newProjectBtn').addEventListener('click', () => {
+        openProjectModal();
+    });
+    document.getElementById('closeProjectModal').addEventListener('click', () => {
+        closeProjectModal();
+    });
+    document.getElementById('cancelProject').addEventListener('click', () => {
+        closeProjectModal();
+    });
+    document.getElementById('projectForm').addEventListener('submit', handleProjectSubmit);
     
     // IP modal
     document.getElementById('addIPBtn').addEventListener('click', () => {
@@ -101,6 +115,8 @@ function switchSection(section) {
     
     if (section === 'posts') {
         document.getElementById('postsSection').classList.add('active');
+    } else if (section === 'projects') {
+        document.getElementById('projectsSection').classList.add('active');
     } else if (section === 'ips') {
         document.getElementById('ipsSection').classList.add('active');
     }
@@ -191,6 +207,135 @@ async function loadPosts() {
     } catch (error) {
         console.error('Error loading posts:', error);
         showNotification('Failed to load posts', 'error');
+    }
+}
+
+// Load projects
+async function loadProjects() {
+    try {
+        const response = await fetch('/api/admin-projects');
+        if (!response.ok) throw new Error('Failed to load projects');
+
+        projects = await response.json();
+        const tbody = document.getElementById('projectsTableBody');
+        tbody.innerHTML = '';
+
+        if (projects.length === 0) {
+            const row = document.createElement('tr');
+            row.innerHTML = `<td colspan="4" style="text-align:center;padding:20px;color:var(--admin-text-secondary);">No projects found</td>`;
+            tbody.appendChild(row);
+            return;
+        }
+
+        projects.forEach(project => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${escapeHtml(project.title)}</td>
+                <td>${escapeHtml(project.role || '')}</td>
+                <td>${escapeHtml(project.stack || '')}</td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn-icon" onclick="editProject('${project.id}')" title="Edit">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M11.333 2A1.886 1.886 0 0114 4.667l-9 9-3.667 1 1-3.667 9-9z" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                        </button>
+                        <button class="btn-icon delete" onclick="deleteProject('${project.id}')" title="Delete">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M2 4h12M6 4V2h4v2m-5 2v7a1 1 0 001 1h4a1 1 0 001-1V6H5z" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                        </button>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    } catch (error) {
+        console.error('Error loading projects:', error);
+    }
+}
+
+function openProjectModal(projectId = null) {
+    const modal = document.getElementById('projectModal');
+    modal.classList.add('active');
+    document.getElementById('projectForm').reset();
+
+    if (projectId) {
+        const project = projects.find(p => p.id === projectId);
+        if (project) {
+            document.getElementById('projectModalTitle').textContent = 'Edit Project';
+            document.getElementById('projectId').value = project.id;
+            document.getElementById('projectTitle').value = project.title || '';
+            document.getElementById('projectRole').value = project.role || '';
+            document.getElementById('projectStack').value = project.stack || '';
+            document.getElementById('projectLink').value = project.link || '';
+            document.getElementById('projectImage').value = project.image || '';
+            document.getElementById('projectBlurb').value = project.blurb || '';
+        }
+    } else {
+        document.getElementById('projectModalTitle').textContent = 'Create New Project';
+        document.getElementById('projectId').value = '';
+    }
+}
+
+function closeProjectModal() {
+    const modal = document.getElementById('projectModal');
+    modal.classList.remove('active');
+}
+
+async function handleProjectSubmit(e) {
+    e.preventDefault();
+
+    const id = document.getElementById('projectId').value;
+    const title = document.getElementById('projectTitle').value;
+    const role = document.getElementById('projectRole').value;
+    const stack = document.getElementById('projectStack').value;
+    const link = document.getElementById('projectLink').value;
+    const image = document.getElementById('projectImage').value;
+    const blurb = document.getElementById('projectBlurb').value;
+
+    try {
+        const response = await fetch(`/api/admin-projects${id ? `?id=${id}` : ''}`, {
+            method: id ? 'PUT' : 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, role, stack, link, image, blurb })
+        });
+
+        if (response.ok) {
+            closeProjectModal();
+            await loadProjects();
+            showNotification('Project saved successfully', 'success');
+        } else {
+            const error = await response.json();
+            showNotification(error.error || 'Failed to save project', 'error');
+        }
+    } catch (error) {
+        console.error('Error saving project:', error);
+        showNotification('Failed to save project', 'error');
+    }
+}
+
+window.editProject = function(projectId) {
+    openProjectModal(projectId);
+}
+
+window.deleteProject = async function(projectId) {
+    if (!confirm('Are you sure you want to delete this project?')) return;
+
+    try {
+        const response = await fetch(`/api/admin-projects?id=${projectId}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            await loadProjects();
+            showNotification('Project deleted successfully', 'success');
+        } else {
+            throw new Error('Failed to delete project');
+        }
+    } catch (error) {
+        console.error('Error deleting project:', error);
+        showNotification('Failed to delete project', 'error');
     }
 }
 
