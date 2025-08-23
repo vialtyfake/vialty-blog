@@ -1,6 +1,25 @@
-import fs from 'fs/promises';
 import path from 'path';
+import sharp from 'sharp';
+import { list, put, del } from '@vercel/blob';
 import { getRedisClient } from './_redis.js';
+
+const STORE = 'vialty-blog-images';
+const MAX_SIZE = 4.5 * 1024 * 1024; // 4.5MB
+
+async function optimizeImage(buffer, format) {
+  if (buffer.length <= MAX_SIZE) return buffer;
+
+  let quality = 80;
+  let optimized = buffer;
+  while (optimized.length > MAX_SIZE && quality > 10) {
+    optimized = await sharp(buffer).toFormat(format, { quality }).toBuffer();
+    quality -= 10;
+  }
+  if (optimized.length > MAX_SIZE) {
+    throw new Error('Image exceeds maximum size after optimization');
+  }
+  return optimized;
+}
 
 export default async function handler(req, res) {
   const { method, query } = req;
@@ -28,16 +47,11 @@ export default async function handler(req, res) {
       return res.status(403).json({ error: 'Unauthorized' });
     }
 
-    const imagesDir = path.join(process.cwd(), 'public', 'images');
+    const token = process.env.BLOB_READ_WRITE_TOKEN;
 
     if (method === 'GET') {
-      let files = [];
-      try {
-        files = await fs.readdir(imagesDir);
-      } catch {
-        files = [];
-      }
-      const images = files.filter(file => /\.(png|jpe?g|gif|webp|svg)$/i.test(file));
+      const { blobs } = await list({ token, prefix: `${STORE}/` });
+      const images = blobs.map(b => b.pathname.replace(`${STORE}/`, ''));
       return res.status(200).json(images);
     }
 
@@ -57,11 +71,17 @@ export default async function handler(req, res) {
       }
 
       try {
-        await fs.mkdir(imagesDir, { recursive: true });
         const base64 = data.split(',')[1] || data;
-        const buffer = Buffer.from(base64, 'base64');
+        let buffer = Buffer.from(base64, 'base64');
         const safeName = name.replace(/[^a-zA-Z0-9._-]/g, '');
-        await fs.writeFile(path.join(imagesDir, safeName), buffer);
+        const ext = path.extname(safeName).slice(1).toLowerCase();
+        const format = ext === 'jpg' ? 'jpeg' : ext || 'jpeg';
+        buffer = await optimizeImage(buffer, format);
+        await put(`${STORE}/${safeName}`, buffer, {
+          access: 'public',
+          token,
+          contentType: `image/${format}`
+        });
       } catch (err) {
         return res.status(500).json({ error: 'Failed to save file', details: err.message });
       }
@@ -73,14 +93,10 @@ export default async function handler(req, res) {
       if (!nameParam) return res.status(400).json({ error: 'Name required' });
 
       const safeName = decodeURIComponent(nameParam).replace(/[^a-zA-Z0-9._-]/g, '');
-      const filePath = path.join(imagesDir, safeName);
-
       try {
-        await fs.unlink(filePath);
-      } catch (err) {
-        return res.status(err.code === 'ENOENT' ? 404 : 500).json({
-          error: err.code === 'ENOENT' ? 'File not found' : 'Failed to delete file'
-        });
+        await del(`${STORE}/${safeName}`, { token });
+      } catch {
+        return res.status(404).json({ error: 'File not found' });
       }
       return res.status(200).json({ success: true });
     }
@@ -98,14 +114,30 @@ export default async function handler(req, res) {
       if (!oldName || !newName) {
         return res.status(400).json({ error: 'Old and new names are required' });
       }
+
       const safeNew = newName.replace(/[^a-zA-Z0-9._-]/g, '');
       const safeOld = decodeURIComponent(oldName).replace(/[^a-zA-Z0-9._-]/g, '');
+      const oldPath = `${STORE}/${safeOld}`;
+      const newPath = `${STORE}/${safeNew}`;
+
       try {
-        await fs.rename(path.join(imagesDir, safeOld), path.join(imagesDir, safeNew));
-      } catch (err) {
-        return res.status(err.code === 'ENOENT' ? 404 : 500).json({
-          error: err.code === 'ENOENT' ? 'File not found' : 'Failed to rename file'
+        const { blobs } = await list({ token, prefix: oldPath });
+        const blob = blobs.find(b => b.pathname === oldPath);
+        if (!blob) return res.status(404).json({ error: 'File not found' });
+
+        const response = await fetch(blob.downloadUrl || blob.url);
+        let buffer = Buffer.from(await response.arrayBuffer());
+        const ext = path.extname(safeNew).slice(1).toLowerCase();
+        const format = ext === 'jpg' ? 'jpeg' : ext || 'jpeg';
+        buffer = await optimizeImage(buffer, format);
+        await put(newPath, buffer, {
+          access: 'public',
+          token,
+          contentType: `image/${format}`
         });
+        await del(oldPath, { token });
+      } catch (err) {
+        return res.status(500).json({ error: 'Failed to rename file', details: err.message });
       }
       return res.status(200).json({ success: true });
     }
@@ -119,3 +151,4 @@ export default async function handler(req, res) {
     });
   }
 }
+
