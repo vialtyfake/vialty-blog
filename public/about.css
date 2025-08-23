@@ -1,13 +1,26 @@
 /* About page styles */
+.hero-section {
+  min-height: 80vh;
+}
+
 .about-section {
-  padding: 120px 30px 60px;
+  padding: 20px 20px 80px;
   max-width: 800px;
   margin: 0 auto;
   color: var(--text-primary);
 }
 
-.about-section p {
+.about-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 40px;
   color: var(--text-secondary);
+  line-height: 1.6;
+  font-family: "Inter", sans-serif;
+}
+
+.about-card p {
   margin-bottom: 20px;
 }
 
@@ -42,23 +55,25 @@
 
 .social-links {
   display: flex;
-  gap: 16px;
+  gap: 20px;
   margin-top: 20px;
 }
 
-.social-links a {
+.social-link {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
+  background: var(--glass-bg);
   border: 1px solid var(--glass-border);
-  border-radius: 12px;
+  border-radius: 10px;
   color: var(--text-secondary);
+  text-decoration: none;
   transition: all 0.3s ease;
 }
 
-.social-links a:hover {
+.social-link:hover {
+  color: var(--text-primary);
   border-color: var(--primary-glow);
-  color: var(--primary-glow);
 }
