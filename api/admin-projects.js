@@ -6,7 +6,15 @@ export default async function handler(req, res) {
 
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
+codex/add-projects-grid-with-admin-management-4ol0kk
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+
+codex/add-projects-grid-with-admin-management-l7za55
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+
+  res.setHeader('Access-Control-Allow-Methods', 'GET, PUT, DELETE, OPTIONS');
+main
+main
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (method === 'OPTIONS') {
@@ -33,6 +41,7 @@ export default async function handler(req, res) {
       return res.status(200).json(projects);
     }
 
+codex/add-projects-grid-with-admin-management-4ol0kk
     if (method === 'POST') {
       let body = req.body;
       if (typeof body === 'string') {
@@ -46,6 +55,10 @@ export default async function handler(req, res) {
       if (!title) {
         return res.status(400).json({ error: 'Title is required' });
       }
+
+codex/add-projects-grid-with-admin-management-l7za55
+    if (method === 'POST') {
+      const { title, role, stack, link, blurb, image } = req.body;main
       const newProject = {
         id: Date.now().toString(),
         title,
@@ -64,6 +77,7 @@ export default async function handler(req, res) {
       return res.status(201).json(newProject);
     }
 
+codex/add-projects-grid-with-admin-management-4ol0kk
     if (method === 'PUT' && query.id) {
       let body = req.body;
       if (typeof body === 'string') {
@@ -74,6 +88,11 @@ export default async function handler(req, res) {
         }
       }
       const { title, role, stack, link, blurb, image } = body || {};
+
+main
+    if (method === 'PUT' && query.id) {
+      const { title, role, stack, link, blurb, image } = req.body;
+main
       const projectsStr = await client.get('projects');
       const projects = projectsStr ? JSON.parse(projectsStr) : [];
       const idx = projects.findIndex(p => p.id === query.id);

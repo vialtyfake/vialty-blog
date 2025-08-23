@@ -35,6 +35,7 @@ export default async function handler(req, res) {
         return res.status(403).json({ error: 'Unauthorized' });
       }
 
+codex/add-projects-grid-with-admin-management-4ol0kk
       let body = req.body;
       if (typeof body === 'string') {
         try {
@@ -47,6 +48,9 @@ export default async function handler(req, res) {
       if (!title) {
         return res.status(400).json({ error: 'Title is required' });
       }
+
+      const { title, role, stack, link, blurb, image } = req.body;
+main
       const newProject = {
         id: Date.now().toString(),
         title,

@@ -306,6 +306,7 @@ async function handleProjectSubmit(e) {
             await loadProjects();
             showNotification('Project saved successfully', 'success');
         } else {
+codex/add-projects-grid-with-admin-management-4ol0kk
             let errorMessage = 'Failed to save project';
             try {
                 const err = await response.json();
@@ -315,6 +316,10 @@ async function handleProjectSubmit(e) {
                 if (text) errorMessage = text;
             }
             showNotification(errorMessage, 'error');
+
+            const error = await response.json();
+            showNotification(error.error || 'Failed to save project', 'error');
+main
         }
     } catch (error) {
         console.error('Error saving project:', error);
