@@ -306,7 +306,6 @@ async function handleProjectSubmit(e) {
             await loadProjects();
             showNotification('Project saved successfully', 'success');
         } else {
-codex/add-projects-grid-with-admin-management-4ol0kk
             let errorMessage = 'Failed to save project';
             try {
                 const err = await response.json();
@@ -316,10 +315,6 @@ codex/add-projects-grid-with-admin-management-4ol0kk
                 if (text) errorMessage = text;
             }
             showNotification(errorMessage, 'error');
-
-            const error = await response.json();
-            showNotification(error.error || 'Failed to save project', 'error');
-main
         }
     } catch (error) {
         console.error('Error saving project:', error);
@@ -455,14 +450,15 @@ function closePostModal() {
 
 async function handlePostSubmit(e) {
     e.preventDefault();
-    
+
+    const postId = document.getElementById('postId').value;
     if (!isAdmin) {
         showNotification('You do not have permission to create posts.', 'error');
         return;
     }
-    
+
     const title = document.getElementById('postTitle').value;
-    const content = document.getElementById('postContentInput').value; // Changed from 'postContent'
+    const content = document.getElementById('postContent').value;
     const tagsInput = document.getElementById('postTags').value;
     const tags = tagsInput ? tagsInput.split(',').map(tag => tag.trim()) : [];
     
