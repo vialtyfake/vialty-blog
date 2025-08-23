@@ -136,6 +136,7 @@ window.openProject = function(projectId) {
 function openProjectView(project) {
     const modal = document.getElementById('projectViewModal');
     const body = document.getElementById('projectModalBody');
+    if (!modal || !body) return;
     const imageUrl = resolveImageUrl(project.image);
     body.innerHTML = `
         ${project.image ? `<img src="${imageUrl}" alt="${escapeHtml(project.title)}" class="modal-project-image"/>` : ''}
