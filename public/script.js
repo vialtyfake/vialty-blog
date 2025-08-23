@@ -10,6 +10,7 @@ const cancelPost = document.getElementById('cancelPost');
 const postForm = document.getElementById('postForm');
 const blogGrid = document.getElementById('blogGrid');
 const projectsGrid = document.getElementById('projectsGrid');
+const bskyEmbed = document.getElementById('bskyEmbed');
 
 // State
 let blogPosts = [];
@@ -30,6 +31,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     await checkAdminStatus();
     await loadBlogPosts();
     await loadProjects();
+    await loadBlueskyWidget();
     setupEventListeners();
     setupSearch();
 });
@@ -96,6 +98,21 @@ async function loadProjects() {
                 Unable to load projects. Please try again later.
             </div>
         `;
+    }
+}
+
+async function loadBlueskyWidget() {
+    if (!bskyEmbed) return;
+    try {
+        const response = await fetch('https://public.api.bsky.app/xrpc/app.bsky.feed.getAuthorFeed?actor=vialtyfake&limit=1');
+        const data = await response.json();
+        const post = data.feed && data.feed[0]?.post;
+        if (!post) return;
+        const postId = post.uri.split('/').pop();
+        const url = encodeURIComponent(`https://bsky.app/profile/vialtyfake/post/${postId}`);
+        bskyEmbed.src = `https://embed.bsky.app/embed?url=${url}&theme=dark`;
+    } catch (error) {
+        console.error('Error loading Bluesky post:', error);
     }
 }
 

@@ -921,6 +921,26 @@
     color: var(--text-primary);
 }
 
+/* Bluesky widget */
+.bsky-widget {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    width: 320px;
+    height: 420px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    overflow: hidden;
+    backdrop-filter: blur(var(--blur-amount));
+}
+
+.bsky-widget iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .section-header {
@@ -962,5 +982,9 @@
     .nav-menu {
         width: 100%;
         left: -100%;
+    }
+
+    .bsky-widget {
+        display: none;
     }
 }
