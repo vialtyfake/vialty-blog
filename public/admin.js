@@ -4,6 +4,7 @@ let currentUserIP = '';
 let posts = [];
 let adminIPs = [];
 let projects = [];
+let projectImages = [];
 
 // Initialize admin panel
 document.addEventListener('DOMContentLoaded', async () => {
@@ -255,7 +256,21 @@ async function loadProjects() {
     }
 }
 
-function openProjectModal(projectId = null) {
+async function loadProjectImages() {
+    try {
+        const response = await fetch('/api/admin-images');
+        if (!response.ok) throw new Error('Failed to load images');
+        projectImages = await response.json();
+        const select = document.getElementById('projectImage');
+        select.innerHTML = '<option value="">Select image</option>' +
+            projectImages.map(img => `<option value="/images/${img}">${escapeHtml(img)}</option>`).join('');
+    } catch (error) {
+        console.error('Error loading images:', error);
+    }
+}
+
+async function openProjectModal(projectId = null) {
+    await loadProjectImages();
     const modal = document.getElementById('projectModal');
     modal.classList.add('active');
     document.getElementById('projectForm').reset();
