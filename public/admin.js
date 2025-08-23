@@ -497,11 +497,13 @@ async function handleImageSubmit(e) {
     }
 }
 
-function openRenameModal(name) {
+function openRenameModalInternal(name) {
     document.getElementById('oldImageName').value = name;
     document.getElementById('newImageName').value = name;
     document.getElementById('renameImageModal').classList.add('active');
 }
+
+window.openRenameModal = openRenameModalInternal;
 
 function closeRenameModal() {
     document.getElementById('renameImageModal').classList.remove('active');
@@ -527,10 +529,6 @@ async function handleRenameSubmit(e) {
         showNotification('Failed to rename image', 'error');
     }
 }
-
-window.openRenameModal = function(name) {
-    openRenameModal(name);
-};
 
 window.deleteImage = async function(name) {
     if (!confirm('Are you sure you want to delete this image?')) return;

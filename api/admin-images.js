@@ -56,11 +56,15 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Name and data are required' });
       }
 
-      await fs.mkdir(imagesDir, { recursive: true });
-      const base64 = data.split(',')[1] || data;
-      const buffer = Buffer.from(base64, 'base64');
-      const safeName = name.replace(/[^a-zA-Z0-9._-]/g, '');
-      await fs.writeFile(path.join(imagesDir, safeName), buffer);
+      try {
+        await fs.mkdir(imagesDir, { recursive: true });
+        const base64 = data.split(',')[1] || data;
+        const buffer = Buffer.from(base64, 'base64');
+        const safeName = name.replace(/[^a-zA-Z0-9._-]/g, '');
+        await fs.writeFile(path.join(imagesDir, safeName), buffer);
+      } catch (err) {
+        return res.status(500).json({ error: 'Failed to save file', details: err.message });
+      }
       return res.status(200).json({ success: true });
     }
 
@@ -95,7 +99,14 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Old and new names are required' });
       }
       const safeNew = newName.replace(/[^a-zA-Z0-9._-]/g, '');
-      await fs.rename(path.join(imagesDir, oldName), path.join(imagesDir, safeNew));
+      const safeOld = decodeURIComponent(oldName).replace(/[^a-zA-Z0-9._-]/g, '');
+      try {
+        await fs.rename(path.join(imagesDir, safeOld), path.join(imagesDir, safeNew));
+      } catch (err) {
+        return res.status(err.code === 'ENOENT' ? 404 : 500).json({
+          error: err.code === 'ENOENT' ? 'File not found' : 'Failed to rename file'
+        });
+      }
       return res.status(200).json({ success: true });
     }
 
