@@ -183,13 +183,20 @@
     padding: 20px;
 }
 
+.hero-header {
+    text-align: center;
+    animation: fadeInDown 1s ease-out forwards;
+}
+
 .main-heading {
     font-family: "Inter", sans-serif;
     font-weight: 900;
-    color: var(--text-primary);
     font-size: clamp(60px, 10vw, 120px);
     letter-spacing: -2px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
+    background: linear-gradient(90deg, var(--primary-glow), var(--secondary-glow));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .glowing-text {
@@ -213,9 +220,22 @@
 
 .hero-subtitle {
     font-family: "Inter", sans-serif;
-    font-size: 20px;
+    font-size: 18px;
     color: var(--text-secondary);
     font-weight: 300;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Search Container - Modern Design */
