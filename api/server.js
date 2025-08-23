@@ -105,13 +105,12 @@ async function requireAdmin(req, res, next) {
 
 // Home page
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
 // About page
 app.get('/about', (req, res) => {
-    const aboutPath = path.join(__dirname, 'about.html');
-    // Check if file exists
+    const aboutPath = path.join(__dirname, '..', 'public', 'about.html');
     require('fs').access(aboutPath, require('fs').constants.F_OK, (err) => {
         if (err) {
             console.error('about.html not found at:', aboutPath);
@@ -124,7 +123,7 @@ app.get('/about', (req, res) => {
 
 // Admin panel
 app.get('/admin', (req, res) => {
-    res.sendFile(path.join(__dirname, 'admin.html'));
+    res.sendFile(path.join(__dirname, '..', 'public', 'admin.html'));
 });
 
 // API Routes
@@ -378,7 +377,7 @@ app.delete('/api/admin-posts', requireAdmin, (req, res) => {
 });
 
 // Serve static files AFTER all routes
-app.use(express.static(path.join(__dirname)));
+app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // 404 handler - must be last
 app.use((req, res) => {
