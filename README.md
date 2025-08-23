@@ -12,3 +12,7 @@ A personal blog with an admin system. Static assets live in the `public` directo
    - API server: `node api/server.js`
 
 No test suite is currently defined.
+
+## Features
+
+- Home page includes a Bluesky widget showing the latest post from the profile.
