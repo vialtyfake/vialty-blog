@@ -317,7 +317,8 @@ body {
 
 /* Tables */
 .posts-table-container,
-.ips-table-container {
+.ips-table-container,
+.projects-table-container {
     background: var(--admin-surface);
     border-radius: 16px;
     overflow: hidden;

@@ -9,16 +9,19 @@ const modalClose = document.getElementById('modalClose');
 const cancelPost = document.getElementById('cancelPost');
 const postForm = document.getElementById('postForm');
 const blogGrid = document.getElementById('blogGrid');
+const projectsGrid = document.getElementById('projectsGrid');
 
 // State
 let blogPosts = [];
 let isAdmin = false;
 window.posts = []; // Global for search
+let projects = [];
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
     await checkAdminStatus();
     await loadBlogPosts();
+    await loadProjects();
     setupEventListeners();
     setupSearch();
 });
@@ -69,6 +72,49 @@ async function loadBlogPosts() {
             </div>
         `;
     }
+}
+
+// Load projects from server
+async function loadProjects() {
+    if (!projectsGrid) return;
+    try {
+        const response = await fetch('/api/projects');
+        projects = await response.json();
+        renderProjects();
+    } catch (error) {
+        console.error('Error loading projects:', error);
+        projectsGrid.innerHTML = `
+            <div style="grid-column:1/-1;text-align:center;padding:40px;color:rgba(255,255,255,0.5);">
+                Unable to load projects. Please try again later.
+            </div>
+        `;
+    }
+}
+
+function renderProjects() {
+    if (!projectsGrid) return;
+    if (projects.length === 0) {
+        projectsGrid.innerHTML = `
+            <div style="grid-column:1/-1;text-align:center;padding:40px;color:rgba(255,255,255,0.5);">
+                No projects added yet.
+            </div>
+        `;
+        return;
+    }
+
+    const html = projects.map(project => `
+        <div class="project-card">
+            ${project.image ? `<img src="${project.image}" alt="${escapeHtml(project.title)}" class="project-image"/>` : ''}
+            <div class="project-content">
+                <h3 class="project-title">${escapeHtml(project.title)}</h3>
+                <p class="project-meta">${escapeHtml(project.role)} · ${escapeHtml(project.stack)}</p>
+                <p class="project-blurb">${escapeHtml(project.blurb)}</p>
+                ${project.link ? `<a href="${project.link}" class="project-link" target="_blank" rel="noopener">Visit</a>` : ''}
+            </div>
+        </div>
+    `).join('');
+
+    projectsGrid.innerHTML = html;
 }
 
 // Setup search functionality
