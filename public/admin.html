@@ -43,6 +43,14 @@
                         </svg>
                         Blog Posts
                     </a>
+                    <a href="#projects" class="nav-item" data-section="projects">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M4 4h12v12H4z" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M4 10h12" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M10 4v12" stroke="currentColor" stroke-width="1.5"/>
+                        </svg>
+                        Projects
+                    </a>
                     <a href="#ips" class="nav-item" data-section="ips">
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                             <path d="M10 2v16M2 10h16" stroke="currentColor" stroke-width="1.5"/>
@@ -104,6 +112,35 @@
                             </thead>
                             <tbody id="postsTableBody">
                                 <!-- Posts will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Projects Section -->
+                <section id="projectsSection" class="content-section">
+                    <div class="section-header">
+                        <h2>Manage Projects</h2>
+                        <button class="btn-primary" id="newProjectBtn">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M10 4v12m-6-6h12" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            New Project
+                        </button>
+                    </div>
+
+                    <div class="projects-table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Role</th>
+                                    <th>Stack</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="projectsTableBody">
+                                <!-- Projects will be loaded here -->
                             </tbody>
                         </table>
                     </div>
@@ -175,6 +212,51 @@
                     <div class="form-actions">
                         <button type="button" class="btn-secondary" id="cancelPost">Cancel</button>
                         <button type="submit" class="btn-primary">Save Post</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Project Modal -->
+        <div class="modal" id="projectModal">
+            <div class="modal-content large">
+                <div class="modal-header">
+                    <h3 id="projectModalTitle">Create New Project</h3>
+                    <button class="modal-close" id="closeProjectModal">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </button>
+                </div>
+                <form id="projectForm">
+                    <input type="hidden" id="projectId" />
+                    <div class="form-group">
+                        <label for="projectTitle">Title</label>
+                        <input type="text" id="projectTitle" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="projectRole">Role</label>
+                        <input type="text" id="projectRole" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="projectStack">Stack</label>
+                        <input type="text" id="projectStack" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="projectLink">Link</label>
+                        <input type="url" id="projectLink" />
+                    </div>
+                    <div class="form-group">
+                        <label for="projectImage">Image URL</label>
+                        <input type="text" id="projectImage" />
+                    </div>
+                    <div class="form-group">
+                        <label for="projectBlurb">Blurb</label>
+                        <textarea id="projectBlurb" rows="3"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" id="cancelProject">Cancel</button>
+                        <button type="submit" class="btn-primary">Save Project</button>
                     </div>
                 </form>
             </div>
