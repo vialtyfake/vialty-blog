@@ -17,6 +17,14 @@ let isAdmin = false;
 window.posts = []; // Global for search
 let projects = [];
 
+const BLOB_BASE_URL = 'https://vialty-blog-images.vercel-blob.com';
+
+function resolveImageUrl(image) {
+    if (!image) return '';
+    if (image.startsWith('http')) return image;
+    return `${BLOB_BASE_URL}/${image.replace(/^\/images\//, '')}`;
+}
+
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
     await checkAdminStatus();
@@ -102,15 +110,18 @@ function renderProjects() {
         return;
     }
 
-    const html = projects.map(project => `
+    const html = projects.map(project => {
+        const imageUrl = resolveImageUrl(project.image);
+        return `
         <div class="project-card" onclick="openProject('${project.id}')">
-            ${project.image ? `<img src="${project.image}" alt="${escapeHtml(project.title)}" class="project-image"/>` : ''}
+            ${project.image ? `<img src="${imageUrl}" alt="${escapeHtml(project.title)}" class="project-image"/>` : ''}
             <div class="project-content">
                 <h3 class="project-title">${escapeHtml(project.title)}</h3>
                 <p class="project-meta">${escapeHtml(project.role)} · ${escapeHtml(project.stack)}</p>
             </div>
         </div>
-    `).join('');
+    `;
+    }).join('');
 
     projectsGrid.innerHTML = html;
 }
@@ -125,8 +136,9 @@ window.openProject = function(projectId) {
 function openProjectView(project) {
     const modal = document.getElementById('projectViewModal');
     const body = document.getElementById('projectModalBody');
+    const imageUrl = resolveImageUrl(project.image);
     body.innerHTML = `
-        ${project.image ? `<img src="${project.image}" alt="${escapeHtml(project.title)}" class="modal-project-image"/>` : ''}
+        ${project.image ? `<img src="${imageUrl}" alt="${escapeHtml(project.title)}" class="modal-project-image"/>` : ''}
         <h1 class="modal-project-title">${escapeHtml(project.title)}</h1>
         <p class="modal-project-meta">${escapeHtml(project.role)} · ${escapeHtml(project.stack)}</p>
         <p class="modal-project-blurb">${escapeHtml(project.blurb)}</p>

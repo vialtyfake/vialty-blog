@@ -7,6 +7,14 @@ let projects = [];
 let projectImages = [];
 let images = [];
 
+const BLOB_BASE_URL = 'https://vialty-blog-images.vercel-blob.com';
+
+function resolveImageUrl(image) {
+    if (!image) return '';
+    if (image.startsWith('http')) return image;
+    return `${BLOB_BASE_URL}/${image.replace(/^\/images\//, '')}`;
+}
+
 // Initialize admin panel
 document.addEventListener('DOMContentLoaded', async () => {
     await checkAdminAccess();
@@ -317,7 +325,7 @@ async function loadProjectImages() {
         projectImages = await response.json();
         const select = document.getElementById('projectImage');
         select.innerHTML = '<option value="">Select image</option>' +
-            projectImages.map(img => `<option value="/images/${img}">${escapeHtml(img)}</option>`).join('');
+            projectImages.map(img => `<option value="${img.url}">${escapeHtml(img.name)}</option>`).join('');
     } catch (error) {
         console.error('Error loading images:', error);
     }
@@ -341,16 +349,16 @@ async function loadImages() {
         images.forEach(img => {
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td><img src="/images/${img}" alt="${escapeHtml(img)}" class="image-thumb"/></td>
-                <td>${escapeHtml(img)}</td>
+                <td><img src="${img.url}" alt="${escapeHtml(img.name)}" class="image-thumb"/></td>
+                <td>${escapeHtml(img.name)}</td>
                 <td>
                     <div class="action-buttons">
-                        <button class="btn-icon" onclick="openRenameModal('${img}')" title="Rename">
+                        <button class="btn-icon" onclick="openRenameModal('${img.name}')" title="Rename">
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                                 <path d="M11.333 2A1.886 1.886 0 0114 4.667l-9 9-3.667 1 1-3.667 9-9z" stroke="currentColor" stroke-width="1.5"/>
                             </svg>
                         </button>
-                        <button class="btn-icon delete" onclick="deleteImage('${img}')" title="Delete">
+                        <button class="btn-icon delete" onclick="deleteImage('${img.name}')" title="Delete">
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                                 <path d="M2 4h12M6 4V2h4v2m-5 2v7a1 1 0 001 1h4a1 1 0 001-1V6H5z" stroke="currentColor" stroke-width="1.5"/>
                             </svg>
@@ -380,7 +388,8 @@ async function openProjectModal(projectId = null) {
             document.getElementById('projectRole').value = project.role || '';
             document.getElementById('projectStack').value = project.stack || '';
             document.getElementById('projectLink').value = project.link || '';
-            document.getElementById('projectImage').value = project.image || '';
+            const imageSelect = document.getElementById('projectImage');
+            imageSelect.value = project.image ? resolveImageUrl(project.image) : '';
             document.getElementById('projectBlurb').value = project.blurb || '';
         }
     } else {
