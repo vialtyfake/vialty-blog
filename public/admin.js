@@ -66,7 +66,7 @@ function initializeDashboard() {
         const isActive = sidebar.classList.toggle('active');
         sidebarOverlay.classList.toggle('active', isActive);
         document.body.classList.toggle('sidebar-open', isActive);
-        sidebarToggle.setAttribute('aria-expanded', isActive);
+        sidebarToggle.setAttribute('aria-expanded', String(isActive));
     });
 
     sidebarOverlay.addEventListener('click', closeSidebar);
