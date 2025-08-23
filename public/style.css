@@ -10,6 +10,8 @@
     --text-secondary: rgba(255, 255, 255, 0.7);
     --background: #000000;
     --blur-amount: 20px;
+    --gradient-1: rgba(0, 212, 255, 0.15);
+    --gradient-2: rgba(255, 0, 255, 0.15);
 }
 
 /* Reset */
@@ -19,15 +21,40 @@
     box-sizing: border-box;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 /* Main container */
 .mainframe {
     background: var(--background);
-    background-image:
-        radial-gradient(circle at 20% 50%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(255, 0, 255, 0.1) 0%, transparent 50%);
     min-height: 100vh;
     position: relative;
     overflow-x: hidden;
+}
+
+.mainframe::before {
+    content: "";
+    position: absolute;
+    inset: -25%;
+    background:
+        radial-gradient(circle at 20% 40%, var(--gradient-1) 0%, transparent 60%),
+        radial-gradient(circle at 80% 60%, var(--gradient-2) 0%, transparent 60%);
+    filter: blur(80px);
+    animation: gradientMove 20s ease-in-out infinite alternate;
+    z-index: -1;
+}
+
+@keyframes gradientMove {
+    0% {
+        transform: translate(-10%, -10%) scale(1);
+    }
+    50% {
+        transform: translate(10%, 10%) scale(1.2);
+    }
+    100% {
+        transform: translate(-10%, 0) scale(1);
+    }
 }
 
 /* Content area */
@@ -173,6 +200,7 @@
     color: var(--text-primary);
     border: 1px solid var(--glass-border);
     padding-left: 30px;
+    transform: translateX(5px);
 }
 
 /* Hero section */
@@ -184,6 +212,8 @@
     min-height: 100vh;
     text-align: center;
     padding: 20px;
+    opacity: 0;
+    animation: sectionFade 1.2s ease forwards;
 }
 
 .hero-header {
@@ -312,6 +342,19 @@
     padding: 100px 30px;
     max-width: 1200px;
     margin: 0 auto;
+    opacity: 0;
+    animation: sectionFade 1.2s ease forwards 0.4s;
+}
+
+@keyframes sectionFade {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .section-header {
@@ -360,6 +403,8 @@
 /* Projects */
 .projects-section {
     padding: 80px 30px 20px;
+    opacity: 0;
+    animation: sectionFade 1.2s ease forwards 0.2s;
 }
 
 .projects-grid {
