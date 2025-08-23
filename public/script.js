@@ -103,19 +103,44 @@ function renderProjects() {
     }
 
     const html = projects.map(project => `
-        <div class="project-card">
+        <div class="project-card" onclick="openProject('${project.id}')">
             ${project.image ? `<img src="${project.image}" alt="${escapeHtml(project.title)}" class="project-image"/>` : ''}
             <div class="project-content">
                 <h3 class="project-title">${escapeHtml(project.title)}</h3>
                 <p class="project-meta">${escapeHtml(project.role)} · ${escapeHtml(project.stack)}</p>
-                <p class="project-blurb">${escapeHtml(project.blurb)}</p>
-                ${project.link ? `<a href="${project.link}" class="project-link" target="_blank" rel="noopener">Visit</a>` : ''}
             </div>
         </div>
     `).join('');
 
     projectsGrid.innerHTML = html;
 }
+
+window.openProject = function(projectId) {
+    const project = projects.find(p => p.id === projectId);
+    if (project) {
+        openProjectView(project);
+    }
+};
+
+function openProjectView(project) {
+    const modal = document.getElementById('projectViewModal');
+    const body = document.getElementById('projectModalBody');
+    body.innerHTML = `
+        ${project.image ? `<img src="${project.image}" alt="${escapeHtml(project.title)}" class="modal-project-image"/>` : ''}
+        <h1 class="modal-project-title">${escapeHtml(project.title)}</h1>
+        <p class="modal-project-meta">${escapeHtml(project.role)} · ${escapeHtml(project.stack)}</p>
+        <p class="modal-project-blurb">${escapeHtml(project.blurb)}</p>
+        ${project.link ? `<a href="${project.link}" class="project-link" target="_blank" rel="noopener">Visit Project</a>` : ''}
+    `;
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+window.closeProjectView = function() {
+    const modal = document.getElementById('projectViewModal');
+    modal.classList.remove('active');
+    document.body.style.overflow = 'auto';
+};
 
 // Setup search functionality
 function setupSearch() {

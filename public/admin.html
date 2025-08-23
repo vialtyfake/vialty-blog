@@ -51,6 +51,14 @@
                         </svg>
                         Projects
                     </a>
+                    <a href="#images" class="nav-item" data-section="images">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V4z" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M8 9l2 2 3-3 3 3v4H4v-3l4-3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                            <circle cx="7" cy="7" r="1.5" stroke="currentColor" stroke-width="1.5"/>
+                        </svg>
+                        Images
+                    </a>
                     <a href="#ips" class="nav-item" data-section="ips">
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                             <path d="M10 2v16M2 10h16" stroke="currentColor" stroke-width="1.5"/>
@@ -141,6 +149,34 @@
                             </thead>
                             <tbody id="projectsTableBody">
                                 <!-- Projects will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Images Section -->
+                <section id="imagesSection" class="content-section">
+                    <div class="section-header">
+                        <h2>Manage Images</h2>
+                        <button class="btn-primary" id="newImageBtn">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                <path d="M10 4v12m-6-6h12" stroke="currentColor" stroke-width="2"/>
+                            </svg>
+                            Upload Image
+                        </button>
+                    </div>
+
+                    <div class="images-table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Preview</th>
+                                    <th>Filename</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="imagesTableBody">
+                                <!-- Images will be loaded here -->
                             </tbody>
                         </table>
                     </div>
@@ -257,6 +293,59 @@
                     <div class="form-actions">
                         <button type="button" class="btn-secondary" id="cancelProject">Cancel</button>
                         <button type="submit" class="btn-primary">Save Project</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Image Upload Modal -->
+        <div class="modal" id="imageModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Upload Image</h3>
+                    <button class="modal-close" id="closeImageModal">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </button>
+                </div>
+                <form id="imageForm">
+                    <div class="form-group">
+                        <label for="imageFile">Select Image</label>
+                        <input type="file" id="imageFile" accept="image/*" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="imageName">File Name (optional)</label>
+                        <input type="text" id="imageName" placeholder="my-image.jpg" />
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" id="cancelImage">Cancel</button>
+                        <button type="submit" class="btn-primary">Upload</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Rename Image Modal -->
+        <div class="modal" id="renameImageModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Rename Image</h3>
+                    <button class="modal-close" id="closeRenameModal">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </button>
+                </div>
+                <form id="renameForm">
+                    <input type="hidden" id="oldImageName" />
+                    <div class="form-group">
+                        <label for="newImageName">New File Name</label>
+                        <input type="text" id="newImageName" required />
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" id="cancelRename">Cancel</button>
+                        <button type="submit" class="btn-primary">Rename</button>
                     </div>
                 </form>
             </div>
