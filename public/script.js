@@ -10,6 +10,8 @@ const cancelPost = document.getElementById('cancelPost');
 const postForm = document.getElementById('postForm');
 const blogGrid = document.getElementById('blogGrid');
 const projectsGrid = document.getElementById('projectsGrid');
+const bskyWidget = document.getElementById('bskyWidget');
+const bskyToggle = document.getElementById('bskyToggle');
 
 // State
 let blogPosts = [];
@@ -265,7 +267,49 @@ function setupEventListeners() {
     if (postForm) {
         postForm.addEventListener('submit', handlePostSubmit);
     }
-    
+
+  // Bluesky widget
+  if (bskyToggle && bskyWidget) {
+    const isTouch =
+      'ontouchstart' in window ||
+      navigator.maxTouchPoints > 0 ||
+      window.matchMedia('(hover: none)').matches;
+    const showWidget = () => {
+      bskyWidget.classList.add('show');
+      bskyWidget.setAttribute('aria-hidden', 'false');
+    };
+    const hideWidget = () => {
+      bskyWidget.classList.remove('show');
+      bskyWidget.setAttribute('aria-hidden', 'true');
+    };
+
+    if (isTouch) {
+      bskyToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        bskyWidget.classList.toggle('show');
+        const isShown = bskyWidget.classList.contains('show');
+        bskyWidget.setAttribute('aria-hidden', String(!isShown));
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!bskyWidget.contains(e.target) && e.target !== bskyToggle) {
+          hideWidget();
+        }
+      });
+    } else {
+      bskyToggle.addEventListener('mouseenter', showWidget);
+      bskyToggle.addEventListener('mouseleave', () => {
+        setTimeout(() => {
+          if (!bskyWidget.matches(':hover')) {
+            hideWidget();
+          }
+        }, 100);
+      });
+      bskyWidget.addEventListener('mouseenter', showWidget);
+      bskyWidget.addEventListener('mouseleave', hideWidget);
+    }
+  }
+
     // ESC key to close modals
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
@@ -520,15 +564,15 @@ style.textContent = `
         }
     }
     
-    @keyframes slideOutFade {
-        from {
-            opacity: 1;
-            transform: translateX(0);
-        }
-        to {
-            opacity: 0;
-            transform: translateX(100px);
-        }
+@keyframes slideOutFade {
+    from {
+        opacity: 1;
+        transform: translateX(0);
     }
+    to {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+}
 `;
 document.head.appendChild(style);
