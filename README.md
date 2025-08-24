@@ -11,3 +11,5 @@ Don't you DARE using anything from this repository.
   - `IMAGEKIT_PRIVATE_KEY`
   - `IMAGEKIT_URL_ENDPOINT`
 - Image optimization uses the optional `sharp` dependency; uploads are saved as-is when it isn't available.
+- Blog posts support up to three attached images.
+- Blog content accepts Markdown for formatting (headings, bold, italic, etc.).
