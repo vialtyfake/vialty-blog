@@ -127,3 +127,77 @@ body::after {
     right: 50%;
     transform: translateX(50%);
 }
+
+/* Mobile-specific improvements */
+@media (max-width: 768px) {
+    /* Reduce background blur effects on mobile for better performance */
+    body::before,
+    body::after {
+        width: 400px;
+        height: 400px;
+        filter: blur(60px);
+    }
+    
+    /* Improve text selection on mobile */
+    ::selection {
+        background: rgba(255, 255, 255, 0.3);
+    }
+    
+    /* Better scrollbar for mobile */
+    ::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        border-radius: 3px;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Further reduce effects on small screens */
+    body::before,
+    body::after {
+        width: 300px;
+        height: 300px;
+        filter: blur(40px);
+    }
+    
+    /* Minimal scrollbar on very small screens */
+    ::-webkit-scrollbar {
+        width: 4px;
+    }
+}
+
+/* Prevent horizontal scroll on mobile */
+@media (max-width: 768px) {
+    html, body {
+        overflow-x: hidden;
+    }
+}
+
+/* Improve tap targets and touch interactions */
+@media (hover: none) and (pointer: coarse) {
+    /* Ensure all interactive elements are at least 44px */
+    button, 
+    a, 
+    input, 
+    select, 
+    textarea {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    /* Remove outline on touch devices */
+    :focus-visible {
+        outline: none;
+    }
+    
+    /* Better focus styles for touch */
+    button:focus,
+    a:focus,
+    input:focus,
+    select:focus,
+    textarea:focus {
+        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+    }
+}

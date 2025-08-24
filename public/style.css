@@ -391,7 +391,6 @@
 .search-results {
     margin-top: 1rem;
     max-height: 400px;
-    overflow-y: auto;
 }
 
 .search-result {
@@ -905,7 +904,6 @@
 .post-modal-body {
     padding: 60px;
     max-height: 90vh;
-    overflow-y: auto;
 }
 
 .post-modal-body::-webkit-scrollbar {
@@ -1009,7 +1007,6 @@
     max-width: 600px;
     width: 90%;
     max-height: 90vh;
-    overflow-y: auto;
     backdrop-filter: blur(var(--blur-amount));
     animation: modalSlideIn 0.3s ease;
 }
@@ -1166,50 +1163,354 @@
 }
 
 /* Responsive */
+@media (max-width: 1024px) {
+    .content {
+        padding: 0 20px;
+    }
+    
+    .blog-grid {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+    }
+    
+    .projects-grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+    }
+}
+
 @media (max-width: 768px) {
+    /* Header improvements */
+    .top-bar {
+        height: 70px;
+        padding: 0 20px;
+    }
+    
+    .header-title {
+        font-size: 20px;
+        letter-spacing: 1px;
+    }
+    
+    .menu-button, .bsky-toggle {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+    }
+    
+    /* Hero section mobile optimization */
+    .hero-section {
+        padding: 80px 20px 40px;
+        min-height: 80vh;
+    }
+    
+    .main-heading {
+        font-size: clamp(48px, 12vw, 80px);
+        margin-bottom: 16px;
+    }
+    
+    .hero-subtitle {
+        font-size: 14px;
+        letter-spacing: 2px;
+    }
+    
+    /* Section improvements */
     .section-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 16px;
+        margin-bottom: 24px;
     }
 
     .section-title {
         font-size: 28px;
     }
     
-    .blog-grid {
-        grid-template-columns: 1fr;
-        gap: 24px;
+    .blog-section, .projects-section {
+        padding: 60px 20px 40px;
     }
     
+    .blog-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .projects-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    /* Blog post cards mobile optimization */
+    .blog-post {
+        min-height: 280px;
+    }
+    
+    .post-card-header {
+        padding: 20px 20px 16px;
+    }
+    
+    .post-title {
+        font-size: 22px;
+        line-height: 1.3;
+    }
+    
+    .post-excerpt {
+        font-size: 14px;
+        padding: 0 20px;
+        line-height: 1.5;
+    }
+    
+    .post-card-footer {
+        padding: 16px 20px 20px;
+    }
+    
+    .post-tags {
+        gap: 6px;
+    }
+    
+    .post-tag {
+        padding: 4px 8px;
+        font-size: 11px;
+    }
+    
+    /* Modal improvements */
     .post-modal-content {
         width: 95%;
+        max-width: none;
         max-height: 95vh;
+        margin: 2.5vh auto;
+        border-radius: 20px;
     }
     
     .post-modal-body {
-        padding: 32px 24px;
+        padding: 20px 16px;
+        max-height: calc(95vh - 40px);
+    }
+    
+    .post-modal-close {
+        top: 16px;
+        right: 16px;
+        width: 40px;
+        height: 40px;
     }
     
     .modal-post-title {
-        font-size: 28px;
+        font-size: 24px;
+        line-height: 1.2;
+        margin-bottom: 16px;
     }
     
     .modal-post-content {
         font-size: 16px;
+        line-height: 1.6;
+    }
+    
+    .modal-post-meta {
+        gap: 16px;
+        font-size: 13px;
     }
     
     .modal-content {
-        padding: 30px 20px;
+        padding: 24px 16px;
+        margin: 20px;
+        border-radius: 16px;
     }
     
+    /* Navigation improvements */
     .nav-menu {
         width: 100%;
         left: -100%;
+        padding: 20px;
     }
-
+    
+    .nav-header {
+        margin-bottom: 40px;
+    }
+    
+    .nav-link {
+        padding: 16px 20px;
+        font-size: 18px;
+        margin-bottom: 8px;
+    }
+    
+    /* Search improvements */
+    .search-container {
+        margin: 1.5rem auto;
+        padding: 0 20px;
+    }
+    
+    .search-input {
+        padding: 14px 14px 14px 3rem;
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+    
+    /* Bluesky widget mobile */
     .bsky-widget {
+        top: 80px;
         right: 10px;
-        width: calc(100% - 20px);
+        left: 10px;
+        width: auto;
+        max-height: 70vh;
+    }
+    
+    /* Form improvements */
+    .form-group input,
+    .form-group textarea {
+        padding: 16px;
+        font-size: 16px; /* Prevents zoom on iOS */
+        border-radius: 12px;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .btn-primary,
+    .btn-secondary {
+        width: 100%;
+        justify-content: center;
+        padding: 16px 24px;
+        font-size: 16px;
+    }
+    
+    /* Page sections mobile */
+    .page-section {
+        padding: 80px 20px 40px;
+    }
+    
+    .page-section h1 {
+        font-size: 36px;
+        margin-bottom: 20px;
+    }
+    
+    .page-section h2 {
+        font-size: 24px;
+        margin-bottom: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Extra small screens */
+    .top-bar {
+        height: 60px;
+        padding: 0 16px;
+    }
+    
+    .header-title {
+        font-size: 18px;
+    }
+    
+    .menu-button, .bsky-toggle {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .hero-section {
+        padding: 70px 16px 30px;
+        min-height: 70vh;
+    }
+    
+    .main-heading {
+        font-size: clamp(36px, 15vw, 60px);
+    }
+    
+    .hero-subtitle {
+        font-size: 12px;
+        letter-spacing: 1px;
+    }
+    
+    .blog-section, .projects-section {
+        padding: 50px 16px 30px;
+    }
+    
+    .section-title {
+        font-size: 24px;
+    }
+    
+    .blog-post {
+        min-height: 260px;
+    }
+    
+    .post-card-header {
+        padding: 16px 16px 12px;
+    }
+    
+    .post-title {
+        font-size: 20px;
+    }
+    
+    .post-excerpt {
+        padding: 0 16px;
+        font-size: 13px;
+    }
+    
+    .post-card-footer {
+        padding: 12px 16px 16px;
+    }
+    
+    .modal-post-title {
+        font-size: 22px;
+    }
+    
+    .modal-post-content {
+        font-size: 15px;
+    }
+    
+    .page-section {
+        padding: 70px 16px 30px;
+    }
+    
+    .page-section h1 {
+        font-size: 32px;
+    }
+    
+    .page-section h2 {
+        font-size: 22px;
+    }
+    
+    .search-container {
+        padding: 0 16px;
+    }
+    
+    .nav-menu {
+        padding: 16px;
+    }
+    
+    .nav-link {
+        font-size: 16px;
+        padding: 14px 16px;
+    }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+    /* Touch devices */
+    .blog-post:hover,
+    .project-card:hover {
+        transform: none;
+        box-shadow: 0 8px 25px rgba(255, 255, 255, 0.1);
+    }
+    
+    .menu-button:hover,
+    .bsky-toggle:hover,
+    .btn-primary:hover,
+    .btn-secondary:hover {
+        transform: none;
+    }
+    
+    /* Larger touch targets */
+    .post-modal-close {
+        width: 48px;
+        height: 48px;
+    }
+    
+    .nav-close {
+        padding: 12px;
+    }
+    
+    /* Remove hover effects that don't work on touch */
+    .post-tag:hover,
+    .nav-link:hover {
+        transform: none;
     }
 }

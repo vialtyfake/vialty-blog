@@ -771,14 +771,32 @@ svg path {
 }
 
 /* Responsive */
+@media (max-width: 1024px) {
+  .main-content {
+    padding: 60px 30px 30px;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
+  }
+  
+  .projects-grid {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+  }
+}
+
 @media (max-width: 768px) {
+  /* Sidebar improvements */
   .sidebar {
     position: fixed;
     inset: 0 auto 0 0;
+    width: 320px;
     transform: translateX(-100%);
     transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
     z-index: 200;
-    padding: 20px;
+    padding: 24px 20px;
   }
 
   .sidebar.open {
@@ -798,45 +816,371 @@ svg path {
   .sidebar-toggle {
     display: block;
   }
+  
+  .sidebar-header {
+    margin-bottom: 32px;
+  }
+  
+  .nav-item {
+    padding: 16px 20px;
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
 
+  /* Main content improvements */
   .main-content {
     padding: 80px 20px 20px;
   }
+  
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  
+  .section-header h2 {
+    font-size: 1.5rem;
+  }
 
+  /* Stats grid mobile optimization */
   .stats-grid {
     grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  
+  .stat-card {
+    padding: 20px;
+  }
+  
+  .stat-card h3 {
+    font-size: 1.5rem;
+  }
+  
+  .stat-card p {
+    font-size: 0.85rem;
   }
 
+  /* Table improvements */
+  .posts-table-container,
+  .images-table-container,
+  .projects-table-container {
+    margin-bottom: 32px;
+    border-radius: 12px;
+  }
+  
+  .data-table {
+    border-radius: 12px;
+  }
+  
+  .data-table th,
+  .data-table td {
+    padding: 12px 16px;
+    font-size: 0.85rem;
+  }
+  
+  .data-table th {
+    font-size: 0.8rem;
+  }
+  
+  /* Hide less important columns on mobile */
+  .data-table .hide-mobile {
+    display: none;
+  }
+
+  /* Projects grid mobile */
+  .projects-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .project-card {
+    border-radius: 12px;
+  }
+  
+  .project-body {
+    padding: 16px;
+  }
+  
+  .project-title {
+    font-size: 1rem;
+  }
+  
+  .project-meta {
+    font-size: 0.85rem;
+  }
+  
+  .project-blurb {
+    font-size: 0.9rem;
+  }
+
+  /* Modal improvements */
   .modal-content {
-    margin: 20px;
-    padding: 24px;
+    margin: 16px;
+    padding: 24px 20px;
+    border-radius: 16px;
+    max-height: calc(100vh - 32px);
+  }
+  
+  .modal-content.large {
+    max-width: none;
+  }
+  
+  .modal-header {
+    margin-bottom: 20px;
+  }
+  
+  .modal-header h3 {
+    font-size: 1.25rem;
   }
 
+  /* Form improvements */
+  .form-group {
+    margin-bottom: 16px;
+  }
+  
+  .form-group label {
+    font-size: 0.9rem;
+  }
+  
+  input,
+  select,
+  textarea {
+    padding: 16px;
+    font-size: 16px; /* Prevents zoom on iOS */
+    border-radius: 10px;
+  }
+  
+  textarea {
+    min-height: 100px;
+  }
+  
   .form-actions {
     flex-direction: column;
+    gap: 12px;
+    margin-top: 24px;
   }
 
   .btn-primary,
   .btn-secondary {
     width: 100%;
     justify-content: center;
+    padding: 16px 24px;
+    font-size: 16px;
+  }
+  
+  /* Button improvements */
+  .btn-icon {
+    padding: 10px;
+    border-radius: 6px;
+  }
+  
+  .action-buttons {
+    gap: 6px;
+  }
+  
+  /* Image thumbnail mobile */
+  .image-thumb {
+    width: 50px;
+    height: 50px;
+    border-radius: 6px;
+  }
+  
+  /* Access overlay mobile */
+  .access-content {
+    margin: 20px;
+    padding: 32px 24px;
+    border-radius: 16px;
+  }
+  
+  .access-content h2 {
+    font-size: 1.5rem;
   }
 }
 
 @media (max-width: 480px) {
+  /* Extra small screens */
+  .sidebar {
+    width: 100%;
+    padding: 20px 16px;
+  }
+  
+  .sidebar-toggle {
+    top: 16px;
+    left: 16px;
+    padding: 8px;
+  }
+  
+  .main-content {
+    padding: 70px 16px 16px;
+  }
+  
+  .section-header h2 {
+    font-size: 1.25rem;
+  }
+
+  /* Single column stats */
   .stats-grid {
     grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .stat-card {
+    padding: 16px;
+    text-align: left;
+  }
+  
+  .stat-card h3 {
+    font-size: 1.25rem;
+    margin-bottom: 4px;
+  }
+  
+  .stat-card p {
+    font-size: 0.8rem;
   }
 
-  .section-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-  }
-
+  /* Table mobile optimization */
   .data-table th,
   .data-table td {
+    padding: 10px 12px;
+    font-size: 0.8rem;
+  }
+  
+  /* Compact project cards */
+  .project-body {
     padding: 12px;
+  }
+  
+  .project-title {
+    font-size: 0.95rem;
+  }
+  
+  .project-meta {
+    font-size: 0.8rem;
+    margin-top: 4px;
+  }
+  
+  .project-blurb {
     font-size: 0.85rem;
+    margin-top: 8px;
+  }
+  
+  .stack-chips {
+    margin-top: 8px;
+    gap: 4px;
+  }
+  
+  .stack-chip {
+    padding: 3px 8px;
+    font-size: 0.7rem;
+  }
+  
+  .card-actions {
+    margin-top: 10px;
+    gap: 6px;
+  }
+
+  /* Modal extra small */
+  .modal-content {
+    margin: 12px;
+    padding: 20px 16px;
+    border-radius: 12px;
+  }
+  
+  .modal-header h3 {
+    font-size: 1.1rem;
+  }
+  
+  input,
+  select,
+  textarea {
+    padding: 14px;
+    border-radius: 8px;
+  }
+  
+  .btn-primary,
+  .btn-secondary {
+    padding: 14px 20px;
+    font-size: 15px;
+  }
+  
+  /* Access overlay extra small */
+  .access-content {
+    margin: 16px;
+    padding: 24px 20px;
+  }
+  
+  .access-content h2 {
+    font-size: 1.25rem;
+  }
+  
+  .access-content p {
+    font-size: 0.9rem;
+  }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+  /* Remove hover effects on touch devices */
+  .nav-item:hover,
+  .btn-primary:hover,
+  .btn-secondary:hover,
+  .btn-icon:hover,
+  .stat-card:hover,
+  .project-card:hover {
+    transform: none;
+  }
+  
+  /* Larger touch targets */
+  .nav-item {
+    padding: 18px 20px;
+  }
+  
+  .btn-icon {
+    padding: 12px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+  
+  .modal-close {
+    padding: 12px;
+  }
+  
+  .sidebar-toggle {
+    padding: 12px;
+  }
+  
+  /* Better spacing for touch */
+  .action-buttons {
+    gap: 8px;
+  }
+  
+  .form-actions {
+    gap: 16px;
+  }
+}
+
+/* Landscape phone optimization */
+@media (max-width: 768px) and (orientation: landscape) {
+  .main-content {
+    padding: 60px 20px 20px;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  
+  .stat-card {
+    padding: 12px;
+  }
+  
+  .stat-card h3 {
+    font-size: 1.1rem;
+  }
+  
+  .stat-card p {
+    font-size: 0.75rem;
   }
 }
