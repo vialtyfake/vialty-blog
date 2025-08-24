@@ -184,10 +184,6 @@ export default async function handler(req, res) {
       error: 'Internal server error',
       details: error.message
     });
-  } finally {
-    if (client && client.quit) {
-      await client.quit();
-    }
+
   }
 }
-
