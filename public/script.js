@@ -89,6 +89,15 @@ async function loadBlogPosts() {
 // Load projects from server
 async function loadProjects() {
     if (!projectsGrid) return;
+
+    // Show loading skeletons for better UX
+    const skeleton = `
+      <div class="project-card skeleton">
+        <div class="skeleton-thumb"></div>
+        <div class="skeleton-lines"><span></span><span></span></div>
+      </div>`;
+    projectsGrid.innerHTML = new Array(6).fill(0).map(() => skeleton).join('');
+
     try {
         const response = await fetch('/api/projects');
         projects = await response.json();
@@ -141,17 +150,31 @@ function renderProjects() {
 
     const html = projects.map(project => {
         const imageUrl = resolveImageUrl(project.image);
+        const title = escapeHtml(project.title || 'Untitled');
+        const role = project.role ? escapeHtml(project.role) : '';
+        const stack = project.stack ? escapeHtml(project.stack) : '';
         const dateRange = project.startDate ? `${formatDate(new Date(project.startDate))} - ${project.endDate ? formatDate(new Date(project.endDate)) : 'Present'}` : '';
+        const initial = title.charAt(0).toUpperCase();
+
         return `
-        <div class="project-card" onclick="openProject('${project.id}')">
-            ${project.image ? `<img src="${imageUrl}" alt="${escapeHtml(project.title)}" class="project-image"/>` : ''}
-            <div class="project-content">
-                <h3 class="project-title">${escapeHtml(project.title)}</h3>
-                <p class="project-meta">${escapeHtml(project.role)} · ${escapeHtml(project.stack)}</p>
-                ${dateRange ? `<p class="project-dates">${escapeHtml(dateRange)}</p>` : ''}
+        <div class="project-card" role="button" tabindex="0" aria-label="Open project: ${title}" onclick="openProject('${project.id}')" onkeypress="if(event.key==='Enter'||event.key===' '){openProject('${project.id}')}" >
+          <div class="project-media">
+            ${project.image ? `<img src="${imageUrl}" alt="${title}" class="project-image"/>` : `<div class="project-placeholder" aria-hidden="true">${initial}</div>`}
+            <span class="project-shine" aria-hidden="true"></span>
+            <div class="project-badges">
+              ${role ? `<span class="project-badge role">${role}</span>` : ''}
+              ${stack ? `<span class="project-badge stack">${stack}</span>` : ''}
             </div>
-        </div>
-    `;
+            <div class="project-overlay">
+              <h3 class="project-title">${title}</h3>
+              ${dateRange ? `<p class="project-dates">${escapeHtml(dateRange)}</p>` : ''}
+            </div>
+          </div>
+          <div class="project-footer">
+            <span class="project-cta">View details</span>
+            <span class="project-arrow" aria-hidden="true">→</span>
+          </div>
+        </div>`;
     }).join('');
 
     projectsGrid.innerHTML = html;

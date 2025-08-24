@@ -468,55 +468,144 @@
 
 .projects-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-    gap: 40px;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 28px;
     padding: 20px 0;
 }
 
 .project-card {
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
-    border-radius: 28px;
+    border-radius: 20px;
     overflow: hidden;
-    transition: all 0.3s ease;
+    transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
     cursor: pointer;
     backdrop-filter: blur(var(--blur-amount));
 }
 
 .project-card:hover {
-    transform: translateY(-8px);
-    border-color: rgba(255, 255, 255, 0.5);
-    box-shadow: 0 20px 40px rgba(255, 255, 255, 0.15);
+    transform: translateY(-6px);
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 14px 34px rgba(255, 255, 255, 0.12);
+}
+
+/* Media wrapper with overlay and shine */
+.project-media {
+    position: relative;
+    width: 100%;
+    height: 220px;
+    overflow: hidden;
 }
 
 .project-image {
     width: 100%;
-    height: 240px;
+    height: 100%;
     object-fit: cover;
     display: block;
+    transform: scale(1.02);
+    transition: transform 0.5s ease;
 }
 
-.project-content {
-    padding: 24px;
+.project-card:hover .project-image {
+    transform: scale(1.06);
+}
+
+.project-placeholder {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+    color: var(--text-primary);
+    font-weight: 900;
+    font-size: 48px;
+    letter-spacing: 2px;
+}
+
+.project-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.65), rgba(0,0,0,0.0) 60%);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 18px;
 }
 
 .project-title {
     font-family: "Inter", sans-serif;
-    font-size: 22px;
+    font-size: 20px;
     color: var(--text-primary);
-    margin-bottom: 12px;
-}
-
-.project-meta {
-    font-size: 16px;
-    color: var(--text-secondary);
+    margin: 0 0 6px;
 }
 
 .project-dates {
-    font-size: 14px;
+    font-size: 13px;
     color: var(--text-secondary);
 }
 
+.project-shine {
+    content: '';
+    position: absolute;
+    top: -100%;
+    left: -50%;
+    width: 50%;
+    height: 300%;
+    background: linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.18) 20%, rgba(255, 255, 255, 0.02) 60%, transparent 100%);
+    transform: rotate(25deg);
+    transition: transform 0.6s ease, opacity 0.6s ease;
+    opacity: 0.0;
+}
+
+.project-card:hover .project-shine {
+    transform: rotate(25deg) translateX(220%);
+    opacity: 1;
+}
+
+.project-badges {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: flex;
+    gap: 8px;
+}
+
+.project-badge {
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+}
+
+.project-badge.role { background: rgba(255,255,255,0.10); }
+.project-badge.stack { background: rgba(255,255,255,0.06); }
+
+.project-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    border-top: 1px solid var(--glass-border);
+}
+
+.project-cta {
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.project-arrow {
+    color: var(--primary-glow);
+    transition: transform 0.3s ease;
+}
+
+.project-card:hover .project-arrow {
+    transform: translateX(4px);
+}
+
+/* Link in modal */
 .project-link {
     color: var(--primary-glow);
     text-decoration: none;
@@ -526,6 +615,32 @@
 .project-link:hover {
     text-decoration: underline;
 }
+
+/* Skeleton loaders */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton-thumb {
+  height: 160px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.skeleton-lines {
+  padding: 12px 16px 18px;
+}
+
+.skeleton-lines span {
+  display: block;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  margin-top: 10px;
+}
+
+.skeleton-lines span:first-child { width: 60%; }
+.skeleton-lines span:last-child { width: 40%; }
 
 .modal-project-image {
     width: 100%;
