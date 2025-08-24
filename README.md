@@ -4,5 +4,5 @@ Don't you DARE using anything from this repository.
 
 ## Development Notes
 
-- Image admin API caches listings in Redis to limit Blob `list` calls.
-- Renames reuse Blob's `copy` when possible to avoid extra uploads.
+- Images are stored on disk under `public/uploads` and served statically.
+- The admin image API supports adding, deleting and renaming files without external services.

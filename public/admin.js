@@ -7,12 +7,11 @@ let projects = [];
 let projectImages = [];
 let images = [];
 
-const BLOB_BASE_URL = 'https://vialty-blog-images.vercel-blob.com';
-
 function resolveImageUrl(image) {
-    if (!image) return '';
-    if (image.startsWith('http')) return image;
-    return `${BLOB_BASE_URL}/${image.replace(/^\/images\//, '')}`;
+  if (!image) return '';
+  if (image.startsWith('http')) return image;
+  if (image.startsWith('/')) return image;
+  return `/uploads/${image}`;
 }
 
 // Initialize admin panel
