@@ -373,6 +373,10 @@ textarea {
   animation: fadeIn 0.3s ease;
 }
 
+.modal.active {
+  display: flex;
+}
+
 .modal-content {
   background: var(--surface);
   border: 1px solid var(--border);
