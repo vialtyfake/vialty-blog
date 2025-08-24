@@ -1,11 +1,14 @@
+import fs from 'fs/promises';
 import path from 'path';
 import sharp from 'sharp';
-import { list, put, del, copy, BlobNotFoundError } from '@vercel/blob';
 import { getRedisClient } from './_redis.js';
 
-const STORE = 'vialty-blog-images';
+const IMAGE_DIR = path.join(process.cwd(), 'public', 'uploads');
 const MAX_SIZE = 4.5 * 1024 * 1024; // 4.5MB
-const CACHE_KEY = 'admin_images_cache';
+
+async function ensureDir() {
+  await fs.mkdir(IMAGE_DIR, { recursive: true });
+}
 
 async function optimizeImage(buffer, format) {
   if (buffer.length <= MAX_SIZE) return buffer;
@@ -48,25 +51,14 @@ export default async function handler(req, res) {
       return res.status(403).json({ error: 'Unauthorized' });
     }
 
-    const token = process.env.BLOB_READ_WRITE_TOKEN;
+    await ensureDir();
 
     if (method === 'GET') {
-      const cached = await client.get(CACHE_KEY);
-      if (cached) {
-        return res.status(200).json(JSON.parse(cached));
-      }
-
-      const { blobs } = await list({ token, prefix: `${STORE}/` });
-
-      // Return both the file name and the public URL so the
-      // admin panel can display and select images.
-      const images = blobs.map(b => ({
-        name: b.pathname.replace(`${STORE}/`, ''),
-        url: b.url
+      const files = await fs.readdir(IMAGE_DIR);
+      const images = files.map(name => ({
+        name,
+        url: `/uploads/${encodeURIComponent(name)}`
       }));
-
-      await client.set(CACHE_KEY, JSON.stringify(images), { EX: 300 });
-
       return res.status(200).json(images);
     }
 
@@ -92,15 +84,10 @@ export default async function handler(req, res) {
         const ext = path.extname(safeName).slice(1).toLowerCase();
         const format = ext === 'jpg' ? 'jpeg' : ext || 'jpeg';
         buffer = await optimizeImage(buffer, format);
-        await put(`${STORE}/${safeName}`, buffer, {
-          access: 'public',
-          token,
-          contentType: `image/${format}`
-        });
+        await fs.writeFile(path.join(IMAGE_DIR, safeName), buffer);
       } catch (err) {
         return res.status(500).json({ error: 'Failed to save file', details: err.message });
       }
-      await client.del(CACHE_KEY);
       return res.status(200).json({ success: true });
     }
 
@@ -110,11 +97,10 @@ export default async function handler(req, res) {
 
       const safeName = decodeURIComponent(nameParam).replace(/[^a-zA-Z0-9._-]/g, '');
       try {
-        await del(`${STORE}/${safeName}`, { token });
+        await fs.unlink(path.join(IMAGE_DIR, safeName));
       } catch {
         return res.status(404).json({ error: 'File not found' });
       }
-      await client.del(CACHE_KEY);
       return res.status(200).json({ success: true });
     }
 
@@ -132,36 +118,26 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Old and new names are required' });
       }
 
-      const safeNew = newName.replace(/[^a-zA-Z0-9._-]/g, '');
       const safeOld = decodeURIComponent(oldName).replace(/[^a-zA-Z0-9._-]/g, '');
-      const oldPath = `${STORE}/${safeOld}`;
-      const newPath = `${STORE}/${safeNew}`;
-      const fromUrl = `https://${STORE}.public.blob.vercel-storage.com/${safeOld}`;
+      const safeNew = newName.replace(/[^a-zA-Z0-9._-]/g, '');
+      const oldPath = path.join(IMAGE_DIR, safeOld);
+      const newPath = path.join(IMAGE_DIR, safeNew);
 
       try {
         const oldExt = path.extname(safeOld).toLowerCase();
         const newExt = path.extname(safeNew).toLowerCase();
 
         if (oldExt === newExt) {
-          await copy(fromUrl, newPath, { access: 'public', token });
+          await fs.rename(oldPath, newPath);
         } else {
-          const response = await fetch(fromUrl);
-          if (!response.ok) {
-            return res.status(404).json({ error: 'File not found' });
-          }
-          let buffer = Buffer.from(await response.arrayBuffer());
+          let buffer = await fs.readFile(oldPath);
           const format = newExt.slice(1) === 'jpg' ? 'jpeg' : newExt.slice(1) || 'jpeg';
           buffer = await optimizeImage(buffer, format);
-          await put(newPath, buffer, {
-            access: 'public',
-            token,
-            contentType: `image/${format}`
-          });
+          await fs.writeFile(newPath, buffer);
+          await fs.unlink(oldPath);
         }
-        await del(oldPath, { token });
-        await client.del(CACHE_KEY);
       } catch (err) {
-        if (err instanceof BlobNotFoundError) {
+        if (err.code === 'ENOENT') {
           return res.status(404).json({ error: 'File not found' });
         }
         return res.status(500).json({ error: 'Failed to rename file', details: err.message });
