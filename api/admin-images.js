@@ -1,6 +1,4 @@
-import fs from 'fs/promises';
-import path from 'path';
-
+import ImageKit from 'imagekit';
 import { getRedisClient } from './_redis.js';
 
 let sharpLib = null;
@@ -18,13 +16,14 @@ async function getSharp() {
   return sharpLib;
 }
 
-const IMAGE_DIR = path.join(process.cwd(), 'public', 'uploads');
+const imagekit = new ImageKit({
+  publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
+  privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
+  urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT
+});
+
 const MAX_SIZE = 4.5 * 1024 * 1024; // 4.5MB
 const MAX_DIMENSION = 1200;
-
-async function ensureDir() {
-  await fs.mkdir(IMAGE_DIR, { recursive: true });
-}
 
 async function optimizeImage(buffer, format) {
   const sharp = await getSharp();
@@ -47,6 +46,11 @@ async function optimizeImage(buffer, format) {
   }
 
   return image.toFormat(format, { quality: 80 }).toBuffer();
+}
+
+async function findFileByName(name) {
+  const files = await imagekit.listFiles({ searchQuery: `name="${name}"` });
+  return files[0];
 }
 
 export default async function handler(req, res) {
@@ -74,14 +78,9 @@ export default async function handler(req, res) {
       return res.status(403).json({ error: 'Unauthorized' });
     }
 
-    await ensureDir();
-
     if (method === 'GET') {
-      const files = await fs.readdir(IMAGE_DIR);
-      const images = files.map(name => ({
-        name,
-        url: `/uploads/${encodeURIComponent(name)}`
-      }));
+      const files = await imagekit.listFiles({});
+      const images = files.map(f => ({ name: f.name, url: f.url }));
       return res.status(200).json(images);
     }
 
@@ -108,11 +107,15 @@ export default async function handler(req, res) {
         }
 
         const safeName = name.replace(/[^a-zA-Z0-9._-]/g, '');
-        const ext = path.extname(safeName).slice(1).toLowerCase();
+        const ext = safeName.split('.').pop().toLowerCase();
         const format = ext === 'jpg' ? 'jpeg' : ext || 'jpeg';
         buffer = await optimizeImage(buffer, format);
 
-        await fs.writeFile(path.join(IMAGE_DIR, safeName), buffer);
+        await imagekit.upload({
+          file: buffer,
+          fileName: safeName,
+          useUniqueFileName: false
+        });
       } catch (err) {
         return res.status(500).json({ error: 'Failed to save file', details: err.message });
       }
@@ -126,11 +129,11 @@ export default async function handler(req, res) {
       }
 
       const safeName = decodeURIComponent(nameParam).replace(/[^a-zA-Z0-9._-]/g, '');
-      try {
-        await fs.unlink(path.join(IMAGE_DIR, safeName));
-      } catch {
+      const file = await findFileByName(safeName);
+      if (!file) {
         return res.status(404).json({ error: 'File not found' });
       }
+      await imagekit.deleteFile(file.fileId);
       return res.status(200).json({ success: true });
     }
 
@@ -151,27 +154,27 @@ export default async function handler(req, res) {
 
       const safeOld = decodeURIComponent(oldName).replace(/[^a-zA-Z0-9._-]/g, '');
       const safeNew = newName.replace(/[^a-zA-Z0-9._-]/g, '');
-      const oldPath = path.join(IMAGE_DIR, safeOld);
-      const newPath = path.join(IMAGE_DIR, safeNew);
+      const file = await findFileByName(safeOld);
+      if (!file) {
+        return res.status(404).json({ error: 'File not found' });
+      }
 
-      try {
-        const oldExt = path.extname(safeOld).toLowerCase();
-        const newExt = path.extname(safeNew).toLowerCase();
+      const oldExt = safeOld.split('.').pop().toLowerCase();
+      const newExt = safeNew.split('.').pop().toLowerCase();
 
-        if (oldExt === newExt) {
-          await fs.rename(oldPath, newPath);
-        } else {
-          let buffer = await fs.readFile(oldPath);
-          const format = newExt.slice(1) === 'jpg' ? 'jpeg' : newExt.slice(1) || 'jpeg';
-          buffer = await optimizeImage(buffer, format);
-          await fs.writeFile(newPath, buffer);
-          await fs.unlink(oldPath);
-        }
-      } catch (err) {
-        if (err.code === 'ENOENT') {
-          return res.status(404).json({ error: 'File not found' });
-        }
-        return res.status(500).json({ error: 'Failed to rename file', details: err.message });
+      if (oldExt === newExt) {
+        await imagekit.renameFile(file.fileId, safeNew);
+      } else {
+        const response = await fetch(file.url);
+        let buffer = Buffer.from(await response.arrayBuffer());
+        const format = newExt === 'jpg' ? 'jpeg' : newExt || 'jpeg';
+        buffer = await optimizeImage(buffer, format);
+        await imagekit.upload({
+          file: buffer,
+          fileName: safeNew,
+          useUniqueFileName: false
+        });
+        await imagekit.deleteFile(file.fileId);
       }
       return res.status(200).json({ success: true });
     }
@@ -183,10 +186,5 @@ export default async function handler(req, res) {
       error: 'Internal server error',
       details: error.message
     });
-
-  }
-}
-
-
   }
 }
