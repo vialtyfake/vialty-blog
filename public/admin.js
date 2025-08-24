@@ -285,17 +285,19 @@ async function loadProjects() {
 
         if (projects.length === 0) {
             const row = document.createElement('tr');
-            row.innerHTML = `<td colspan="4" style="text-align:center;padding:20px;color:var(--admin-text-secondary);">No projects found</td>`;
+            row.innerHTML = `<td colspan="5" style="text-align:center;padding:20px;color:var(--admin-text-secondary);">No projects found</td>`;
             tbody.appendChild(row);
             return;
         }
 
         projects.forEach(project => {
             const row = document.createElement('tr');
+            const dateRange = project.startDate ? `${project.startDate} - ${project.endDate || 'Present'}` : '';
             row.innerHTML = `
                 <td>${escapeHtml(project.title)}</td>
                 <td>${escapeHtml(project.role || '')}</td>
                 <td>${escapeHtml(project.stack || '')}</td>
+                <td>${escapeHtml(dateRange)}</td>
                 <td>
                     <div class="action-buttons">
                         <button class="btn-icon" onclick="editProject('${project.id}')" title="Edit">
@@ -391,6 +393,8 @@ async function openProjectModal(projectId = null) {
             const imageSelect = document.getElementById('projectImage');
             imageSelect.value = project.image ? resolveImageUrl(project.image) : '';
             document.getElementById('projectBlurb').value = project.blurb || '';
+            document.getElementById('projectStart').value = project.startDate || '';
+            document.getElementById('projectEnd').value = project.endDate || '';
         }
     } else {
         document.getElementById('projectModalTitle').textContent = 'Create New Project';
@@ -413,12 +417,14 @@ async function handleProjectSubmit(e) {
     const link = document.getElementById('projectLink').value;
     const image = document.getElementById('projectImage').value;
     const blurb = document.getElementById('projectBlurb').value;
+    const startDate = document.getElementById('projectStart').value;
+    const endDate = document.getElementById('projectEnd').value;
 
     try {
         const response = await fetch(`/api/admin-projects${id ? `?id=${id}` : ''}`, {
             method: id ? 'PUT' : 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ title, role, stack, link, image, blurb })
+            body: JSON.stringify({ title, role, stack, link, image, blurb, startDate, endDate })
         });
 
         if (response.ok) {

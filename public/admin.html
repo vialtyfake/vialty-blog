@@ -150,6 +150,7 @@
                                     <th>Title</th>
                                     <th>Role</th>
                                     <th>Stack</th>
+                                    <th>Dates</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -285,6 +286,14 @@
                         <input type="text" id="projectStack" required />
                     </div>
                     <div class="form-group">
+                        <label for="projectStart">Start Date</label>
+                        <input type="date" id="projectStart" />
+                    </div>
+                    <div class="form-group">
+                        <label for="projectEnd">End Date</label>
+                        <input type="date" id="projectEnd" />
+                    </div>
+                    <div class="form-group">
                         <label for="projectLink">Link</label>
                         <input type="url" id="projectLink" />
                     </div>
@@ -294,7 +303,7 @@
                     </div>
                     <div class="form-group">
                         <label for="projectBlurb">Blurb</label>
-                        <textarea id="projectBlurb" rows="3"></textarea>
+                        <textarea id="projectBlurb" rows="5"></textarea>
                     </div>
                     <div class="form-actions">
                         <button type="button" class="btn-secondary" id="cancelProject">Cancel</button>
