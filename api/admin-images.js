@@ -1,8 +1,22 @@
 import fs from 'fs/promises';
 import path from 'path';
-import sharp from 'sharp';
 
 import { getRedisClient } from './_redis.js';
+
+let sharpLib = null;
+
+async function getSharp() {
+  if (!sharpLib) {
+    try {
+      const mod = await import('sharp');
+      sharpLib = mod.default || mod;
+    } catch (err) {
+      console.warn('sharp not available, skipping optimization');
+      sharpLib = null;
+    }
+  }
+  return sharpLib;
+}
 
 const IMAGE_DIR = path.join(process.cwd(), 'public', 'uploads');
 const MAX_SIZE = 4.5 * 1024 * 1024; // 4.5MB
@@ -13,6 +27,10 @@ async function ensureDir() {
 }
 
 async function optimizeImage(buffer, format) {
+  const sharp = await getSharp();
+  if (!sharp) {
+    return buffer;
+  }
   const image = sharp(buffer);
   const metadata = await image.metadata();
 
