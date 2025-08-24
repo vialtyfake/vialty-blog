@@ -8,8 +8,11 @@ const memoryClient = {
   async get(key) {
     return memoryStore[key] ?? null;
   },
-  async set(key, value) {
+  async set(key, value, _opts) {
     memoryStore[key] = value;
+  },
+  async del(key) {
+    delete memoryStore[key];
   },
   async quit() {
     // No-op for memory client

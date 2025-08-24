@@ -1,10 +1,11 @@
 import path from 'path';
 import sharp from 'sharp';
-import { list, put, del } from '@vercel/blob';
+import { list, put, del, copy, BlobNotFoundError } from '@vercel/blob';
 import { getRedisClient } from './_redis.js';
 
 const STORE = 'vialty-blog-images';
 const MAX_SIZE = 4.5 * 1024 * 1024; // 4.5MB
+const CACHE_KEY = 'admin_images_cache';
 
 async function optimizeImage(buffer, format) {
   if (buffer.length <= MAX_SIZE) return buffer;
@@ -50,6 +51,11 @@ export default async function handler(req, res) {
     const token = process.env.BLOB_READ_WRITE_TOKEN;
 
     if (method === 'GET') {
+      const cached = await client.get(CACHE_KEY);
+      if (cached) {
+        return res.status(200).json(JSON.parse(cached));
+      }
+
       const { blobs } = await list({ token, prefix: `${STORE}/` });
 
       // Return both the file name and the public URL so the
@@ -58,6 +64,8 @@ export default async function handler(req, res) {
         name: b.pathname.replace(`${STORE}/`, ''),
         url: b.url
       }));
+
+      await client.set(CACHE_KEY, JSON.stringify(images), { EX: 300 });
 
       return res.status(200).json(images);
     }
@@ -92,6 +100,7 @@ export default async function handler(req, res) {
       } catch (err) {
         return res.status(500).json({ error: 'Failed to save file', details: err.message });
       }
+      await client.del(CACHE_KEY);
       return res.status(200).json({ success: true });
     }
 
@@ -105,6 +114,7 @@ export default async function handler(req, res) {
       } catch {
         return res.status(404).json({ error: 'File not found' });
       }
+      await client.del(CACHE_KEY);
       return res.status(200).json({ success: true });
     }
 
@@ -126,24 +136,34 @@ export default async function handler(req, res) {
       const safeOld = decodeURIComponent(oldName).replace(/[^a-zA-Z0-9._-]/g, '');
       const oldPath = `${STORE}/${safeOld}`;
       const newPath = `${STORE}/${safeNew}`;
+      const fromUrl = `https://${STORE}.public.blob.vercel-storage.com/${safeOld}`;
 
       try {
-        const { blobs } = await list({ token, prefix: oldPath });
-        const blob = blobs.find(b => b.pathname === oldPath);
-        if (!blob) return res.status(404).json({ error: 'File not found' });
+        const oldExt = path.extname(safeOld).toLowerCase();
+        const newExt = path.extname(safeNew).toLowerCase();
 
-        const response = await fetch(blob.downloadUrl || blob.url);
-        let buffer = Buffer.from(await response.arrayBuffer());
-        const ext = path.extname(safeNew).slice(1).toLowerCase();
-        const format = ext === 'jpg' ? 'jpeg' : ext || 'jpeg';
-        buffer = await optimizeImage(buffer, format);
-        await put(newPath, buffer, {
-          access: 'public',
-          token,
-          contentType: `image/${format}`
-        });
+        if (oldExt === newExt) {
+          await copy(fromUrl, newPath, { access: 'public', token });
+        } else {
+          const response = await fetch(fromUrl);
+          if (!response.ok) {
+            return res.status(404).json({ error: 'File not found' });
+          }
+          let buffer = Buffer.from(await response.arrayBuffer());
+          const format = newExt.slice(1) === 'jpg' ? 'jpeg' : newExt.slice(1) || 'jpeg';
+          buffer = await optimizeImage(buffer, format);
+          await put(newPath, buffer, {
+            access: 'public',
+            token,
+            contentType: `image/${format}`
+          });
+        }
         await del(oldPath, { token });
+        await client.del(CACHE_KEY);
       } catch (err) {
+        if (err instanceof BlobNotFoundError) {
+          return res.status(404).json({ error: 'File not found' });
+        }
         return res.status(500).json({ error: 'Failed to rename file', details: err.message });
       }
       return res.status(200).json({ success: true });
