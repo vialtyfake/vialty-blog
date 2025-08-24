@@ -311,6 +311,7 @@ async function loadProjects() {
             const imgUrl = resolveImageUrl(project.image || '');
             const hasImage = !!imgUrl;
             const dateRange = project.startDate ? `${project.startDate} - ${project.endDate || 'Present'}` : '';
+            const metaLine = [project.role, project.stack].filter(Boolean).join(' · ');
 
             const stackChips = (project.stack || '')
                 .split(',')
@@ -323,22 +324,15 @@ async function loadProjects() {
             const blurbShort = blurb.length > 180 ? `${escapeHtml(blurb.slice(0, 180))}…` : escapeHtml(blurb);
 
             card.innerHTML = `
-                <div class="project-media ${hasImage ? '' : 'no-image'}" ${hasImage ? `style="background-image:url('${imgUrl}')"` : ''}>
-                    ${project.link ? `<a class="project-link" href="${escapeHtml(project.link)}" target="_blank" rel="noopener noreferrer" title="Open project">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                            <path d="M14 3h7v7M21 3l-9 9M5 21h14a2 2 0 002-2V9" stroke="currentColor" stroke-width="2"/>
-                        </svg>
-                    </a>` : ''}
-                </div>
+                <div class="project-media ${hasImage ? '' : 'no-image'}" ${hasImage ? `style="background-image:url('${imgUrl}')"` : ''}></div>
                 <div class="project-body">
                     <div class="project-header">
                         <h3 class="project-title">${escapeHtml(project.title || 'Untitled')}</h3>
                     </div>
                     <div class="project-meta">
-                        ${project.role ? `<span class="project-role">${escapeHtml(project.role)}</span>` : ''}
+                        ${metaLine ? `<span class="project-info">${escapeHtml(metaLine)}</span>` : ''}
                         ${dateRange ? `<span class="project-dates">${escapeHtml(dateRange)}</span>` : ''}
                     </div>
-                    ${stackChips ? `<div class="stack-chips">${stackChips}</div>` : ''}
                     ${blurb ? `<p class="project-blurb">${blurbShort}</p>` : ''}
                     <div class="card-actions">
                         <button class="btn-icon" onclick="editProject('${project.id}')" title="Edit">
