@@ -8,8 +8,19 @@
     --glass-border: rgba(255, 255, 255, 0.1);
     --text-primary: #ffffff;
     --text-secondary: rgba(255, 255, 255, 0.7);
-    --background: #000000;
+    --background: linear-gradient(135deg, #000 0%, #111 50%, #2a2a2a 100%);
     --blur-amount: 20px;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Reset */
@@ -26,6 +37,7 @@
     position: relative;
     overflow-x: hidden;
     overflow-y: hidden;
+    animation: fadeInUp 0.6s ease;
 }
 
 .mainframe::before {
@@ -61,6 +73,7 @@
     margin: 0 auto;
     min-height: 100vh;
     position: relative;
+    padding: 0 40px;
 }
 
 /* Top bar */
@@ -113,6 +126,7 @@
     background: var(--hover-bg);
     border-color: var(--primary-glow);
     box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px) scale(1.05);
 }
 
 .menu-icon {
@@ -150,6 +164,7 @@
   background: var(--hover-bg);
   border-color: var(--primary-glow);
   box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px) scale(1.05);
 }
 
 .bsky-icon {
@@ -951,7 +966,7 @@
 }
 
 .btn-primary:hover {
-    transform: translateY(-2px);
+    transform: translateY(-2px) scale(1.05);
     box-shadow: 0 10px 30px rgba(255, 255, 255, 0.3);
 }
 
@@ -964,6 +979,8 @@
 .btn-secondary:hover {
     background: var(--glass-bg);
     color: var(--text-primary);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
 }
 
 /* Bluesky widget */

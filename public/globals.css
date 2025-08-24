@@ -25,6 +25,21 @@ html, body {
     -moz-osx-font-smoothing: grayscale;
 }
 
+body {
+  background: linear-gradient(135deg, #000 0%, #111 50%, #2a2a2a 100%);
+  color: var(--text-primary, #f5f5f5);
+  animation: fadePageIn 0.6s ease;
+}
+
+@keyframes fadePageIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
     width: 10px;
