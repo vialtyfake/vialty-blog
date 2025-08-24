@@ -589,6 +589,11 @@ textarea {
   to { transform: rotate(360deg); }
 }
 
+.nav-item svg path,
+.modal-close svg path {
+  stroke: white !important;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .sidebar {
