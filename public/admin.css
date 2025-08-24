@@ -5,7 +5,7 @@
     --admin-primary-light: #e5e5e5;
     --admin-primary-dark: #888888;
     --admin-accent: #cccccc;
-    --admin-bg: #000000;
+    --admin-bg: linear-gradient(135deg, #000 0%, #111 50%, #2a2a2a 100%);
     --admin-surface: #1a1a1a;
     --admin-surface-light: #2a2a2a;
     --admin-border: rgba(255, 255, 255, 0.1);
@@ -31,6 +31,16 @@ body {
     min-height: 100vh;
     font-size: 14px;
     line-height: 1.6;
+    animation: fadePageIn 0.6s ease;
+}
+
+@keyframes fadePageIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 body.sidebar-open {
@@ -128,7 +138,7 @@ body.sidebar-open {
 }
 
 .btn-back:hover {
-    transform: translateY(-2px);
+    transform: translateY(-2px) scale(1.05);
     box-shadow: 0 12px 24px rgba(255, 255, 255, 0.2);
 }
 
@@ -536,7 +546,7 @@ body.sidebar-open {
 }
 
 .btn-primary:hover {
-    transform: translateY(-2px);
+    transform: translateY(-2px) scale(1.05);
     box-shadow: 0 8px 16px rgba(255, 255, 255, 0.2);
 }
 
@@ -548,6 +558,8 @@ body.sidebar-open {
 .btn-secondary:hover {
     background: var(--admin-bg);
     color: var(--admin-text);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
 }
 
 /* Modal */
