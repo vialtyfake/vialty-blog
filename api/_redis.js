@@ -39,7 +39,6 @@ export async function getRedisClient() {
       client = memoryClient;
     }
   }
-
   return client;
 }
 
