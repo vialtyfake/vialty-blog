@@ -272,33 +272,75 @@ async function loadPosts() {
     }
 }
 
-// Load projects
+// Load projects (card grid)
 async function loadProjects() {
     try {
         const response = await fetch('/api/admin-projects');
         if (!response.ok) throw new Error('Failed to load projects');
 
         projects = await response.json();
-        const tbody = document.getElementById('projectsTableBody');
-        tbody.innerHTML = '';
+        const grid = document.getElementById('projectsGrid');
+        if (!grid) return;
+        grid.innerHTML = '';
 
-        if (projects.length === 0) {
-            const row = document.createElement('tr');
-            row.innerHTML = `<td colspan="5" style="text-align:center;padding:20px;color:var(--admin-text-secondary);">No projects found</td>`;
-            tbody.appendChild(row);
+        if (!projects || projects.length === 0) {
+            const empty = document.createElement('div');
+            empty.className = 'project-empty';
+            empty.innerHTML = `
+                <div class="project-empty-card">
+                    <div class="empty-icon">➕</div>
+                    <h3>No projects yet</h3>
+                    <p>Create your first project to showcase your work.</p>
+                    <button class="btn-primary" id="emptyNewProjectBtn" type="button">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M10 4v12m-6-6h12" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        New Project
+                    </button>
+                </div>`;
+            grid.appendChild(empty);
+            const btn = empty.querySelector('#emptyNewProjectBtn');
+            if (btn) btn.addEventListener('click', () => openProjectModal());
             return;
         }
 
         projects.forEach(project => {
-            const row = document.createElement('tr');
+            const card = document.createElement('div');
+            card.className = 'project-card';
+
+            const imgUrl = resolveImageUrl(project.image || '');
+            const hasImage = !!imgUrl;
             const dateRange = project.startDate ? `${project.startDate} - ${project.endDate || 'Present'}` : '';
-            row.innerHTML = `
-                <td>${escapeHtml(project.title)}</td>
-                <td>${escapeHtml(project.role || '')}</td>
-                <td>${escapeHtml(project.stack || '')}</td>
-                <td>${escapeHtml(dateRange)}</td>
-                <td>
-                    <div class="action-buttons">
+
+            const stackChips = (project.stack || '')
+                .split(',')
+                .map(s => s.trim())
+                .filter(Boolean)
+                .map(s => `<span class="stack-chip">${escapeHtml(s)}</span>`) // chips
+                .join('');
+
+            const blurb = (project.blurb || '').trim();
+            const blurbShort = blurb.length > 180 ? `${escapeHtml(blurb.slice(0, 180))}…` : escapeHtml(blurb);
+
+            card.innerHTML = `
+                <div class="project-media ${hasImage ? '' : 'no-image'}" ${hasImage ? `style="background-image:url('${imgUrl}')"` : ''}>
+                    ${project.link ? `<a class="project-link" href="${escapeHtml(project.link)}" target="_blank" rel="noopener noreferrer" title="Open project">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M14 3h7v7M21 3l-9 9M5 21h14a2 2 0 002-2V9" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </a>` : ''}
+                </div>
+                <div class="project-body">
+                    <div class="project-header">
+                        <h3 class="project-title">${escapeHtml(project.title || 'Untitled')}</h3>
+                    </div>
+                    <div class="project-meta">
+                        ${project.role ? `<span class="project-role">${escapeHtml(project.role)}</span>` : ''}
+                        ${dateRange ? `<span class="project-dates">${escapeHtml(dateRange)}</span>` : ''}
+                    </div>
+                    ${stackChips ? `<div class="stack-chips">${stackChips}</div>` : ''}
+                    ${blurb ? `<p class="project-blurb">${blurbShort}</p>` : ''}
+                    <div class="card-actions">
                         <button class="btn-icon" onclick="editProject('${project.id}')" title="Edit">
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                                 <path d="M11.333 2A1.886 1.886 0 0114 4.667l-9 9-3.667 1 1-3.667 9-9z" stroke="currentColor" stroke-width="1.5"/>
@@ -310,12 +352,13 @@ async function loadProjects() {
                             </svg>
                         </button>
                     </div>
-                </td>
-            `;
-            tbody.appendChild(row);
+                </div>`;
+
+            grid.appendChild(card);
         });
     } catch (error) {
         console.error('Error loading projects:', error);
+        showNotification('Failed to load projects', 'error');
     }
 }
 
