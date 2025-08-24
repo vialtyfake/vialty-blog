@@ -18,6 +18,7 @@ let blogPosts = [];
 let isAdmin = false;
 window.posts = []; // Global for search
 let projects = [];
+let availableImages = [];
 const BSKY_HANDLE = 'vialty.site';
 
 function resolveImageUrl(image) {
@@ -48,7 +49,7 @@ async function checkAdminStatus() {
             newPostBtn.style.display = isAdmin ? 'flex' : 'none';
         }
         
-        // Add admin link to navigation if user is admin
+        // Add admin link and load images if user is admin
         if (isAdmin) {
             const existingAdminLink = document.querySelector('.nav-link[href="/admin"]');
             if (!existingAdminLink) {
@@ -56,6 +57,7 @@ async function checkAdminStatus() {
                 adminLink.innerHTML = '<a href="/admin" class="nav-link">Admin Panel</a>';
                 document.querySelector('.nav-links').appendChild(adminLink);
             }
+            await loadAvailableImages();
         }
     } catch (error) {
         console.error('Error checking admin status:', error);
@@ -99,6 +101,31 @@ async function loadProjects() {
             </div>
         `;
     }
+}
+
+async function loadAvailableImages() {
+    try {
+        const response = await fetch('/api/admin-images');
+        if (response.ok) {
+            availableImages = await response.json();
+        }
+    } catch (error) {
+        console.error('Error loading images:', error);
+    }
+}
+
+function populatePostImageSelects(selected = []) {
+    const selects = [
+        document.getElementById('postImage1'),
+        document.getElementById('postImage2'),
+        document.getElementById('postImage3')
+    ];
+    selects.forEach((select, index) => {
+        if (!select) return;
+        select.innerHTML = '<option value="">No image</option>' +
+            availableImages.map(img => `<option value="${img.name}">${escapeHtml(img.name)}</option>`).join('');
+        select.value = selected[index] || '';
+    });
 }
 
 function renderProjects() {
@@ -243,6 +270,7 @@ function setupEventListeners() {
     if (newPostBtn) {
         newPostBtn.addEventListener('click', () => {
             if (isAdmin) {
+                populatePostImageSelects();
                 postModal.classList.add('active');
                 document.body.style.overflow = 'hidden';
             }
@@ -363,7 +391,7 @@ function renderBlogPosts() {
 function createPostElement(post) {
     const article = document.createElement('article');
     article.className = 'blog-post';
-    
+
     // Parse tags
     let tags = [];
     try {
@@ -374,8 +402,12 @@ function createPostElement(post) {
     
     // Get first tag as category
     const category = tags[0] || 'General';
-    
+    const thumb = post.images && post.images.length
+        ? `<img src="${resolveImageUrl(post.images[0])}" alt="${escapeHtml(post.title)}" class="post-thumb"/>`
+        : '';
+
     article.innerHTML = `
+        ${thumb}
         <div class="post-card-header">
             <div class="post-meta">
                 <span class="post-date">${formatDate(new Date(post.created_at))}</span>
@@ -414,6 +446,14 @@ function openPostView(post) {
         tags = [];
     }
     
+    const imagesHtml = (post.images || [])
+        .map(img => `<img src="${resolveImageUrl(img)}" alt="${escapeHtml(post.title)}" class="modal-post-image"/>`)
+        .join('');
+
+    const contentHtml = typeof marked !== 'undefined'
+        ? DOMPurify.sanitize(marked.parse(post.content || ''))
+        : escapeHtml(post.content).replace(/\n/g, '<br>');
+
     modalBody.innerHTML = `
         <div class="modal-post-header">
             <h1 class="modal-post-title">${escapeHtml(post.title)}</h1>
@@ -423,9 +463,8 @@ function openPostView(post) {
                 <span>⏱️ ${Math.ceil(post.content.split(' ').length / 200)} min read</span>
             </div>
         </div>
-        <div class="modal-post-content">
-            ${escapeHtml(post.content).replace(/\n/g, '<br>')}
-        </div>
+        ${imagesHtml ? `<div class="modal-post-images">${imagesHtml}</div>` : ''}
+        <div class="modal-post-content">${contentHtml}</div>
         ${tags.length > 0 ? `
             <div class="modal-post-tags">
                 ${tags.map(tag => `<span class="modal-tag">#${escapeHtml(tag)}</span>`).join('')}
@@ -478,6 +517,11 @@ async function handlePostSubmit(e) {
     const content = document.getElementById('postContent').value;
     const tagsInput = document.getElementById('postTags').value;
     const tags = tagsInput ? tagsInput.split(',').map(tag => tag.trim()) : [];
+    const imagesSelected = [
+        document.getElementById('postImage1').value,
+        document.getElementById('postImage2').value,
+        document.getElementById('postImage3').value
+    ].filter(Boolean);
     
     try {
         const response = await fetch('/api/posts', {
@@ -485,7 +529,7 @@ async function handlePostSubmit(e) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ title, content, tags })
+            body: JSON.stringify({ title, content, tags, images: imagesSelected })
         });
         
         if (response.ok) {

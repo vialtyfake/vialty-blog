@@ -37,7 +37,7 @@ export default async function handler(req, res) {
 
     if (method === 'PUT' && query.id) {
       // Update post
-      const { title, content, tags, is_published } = req.body;
+      const { title, content, tags, images = [], is_published } = req.body;
       const postsStr = await client.get('posts');
       const posts = postsStr ? JSON.parse(postsStr) : [];
       const postIndex = posts.findIndex(p => p.id === query.id);
@@ -46,11 +46,13 @@ export default async function handler(req, res) {
         return res.status(404).json({ error: 'Post not found' });
       }
 
+      const limitedImages = Array.isArray(images) ? images.slice(0, 3) : [];
       posts[postIndex] = {
         ...posts[postIndex],
         title,
         content,
         tags: JSON.stringify(tags || []),
+        images: limitedImages,
         is_published,
         updated_at: new Date().toISOString()
       };

@@ -137,12 +137,24 @@
                         <input type="text" id="postTitle" required />
                     </div>
                     <div class="form-group">
-                        <label for="postContentInput">Content</label>
-                        <textarea id="postContentInput" rows="6" required></textarea>
+                        <label for="postContent">Content</label>
+                        <textarea id="postContent" rows="6" required></textarea>
                     </div>
                     <div class="form-group">
                         <label for="postTags">Tags (comma separated)</label>
                         <input type="text" id="postTags" placeholder="design, tech, web" />
+                    </div>
+                    <div class="form-group">
+                        <label for="postImage1">Image 1</label>
+                        <select id="postImage1"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="postImage2">Image 2</label>
+                        <select id="postImage2"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="postImage3">Image 3</label>
+                        <select id="postImage3"></select>
                     </div>
                     <div class="form-actions">
                         <button type="button" class="btn-secondary" id="cancelPost">Cancel</button>
@@ -160,6 +172,8 @@
       </p>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.3/dist/purify.min.js"></script>
     <script src="script.js"></script>
   </body>
   </html>

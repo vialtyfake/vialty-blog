@@ -374,6 +374,20 @@ async function loadImages() {
     }
 }
 
+function populatePostImageSelects(selected = []) {
+    const selects = [
+        document.getElementById('postImage1'),
+        document.getElementById('postImage2'),
+        document.getElementById('postImage3')
+    ];
+    selects.forEach((select, index) => {
+        if (!select) return;
+        select.innerHTML = '<option value="">No image</option>' +
+            images.map(img => `<option value="${img.name}">${escapeHtml(img.name)}</option>`).join('');
+        select.value = selected[index] || '';
+    });
+}
+
 async function openProjectModal(projectId = null) {
     await loadProjectImages();
     const modal = document.getElementById('projectModal');
@@ -680,12 +694,14 @@ function openPostModal(postId = null) {
             }
             document.getElementById('postTags').value = tags.join(', ');
             document.getElementById('postPublished').checked = post.is_published !== false;
+            populatePostImageSelects(post.images || []);
         }
     } else {
         // Create mode
         document.getElementById('modalTitle').textContent = 'Create New Post';
         form.reset();
         document.getElementById('postId').value = '';
+        populatePostImageSelects();
     }
     
     modal.classList.add('active');
@@ -710,7 +726,13 @@ async function handlePostSubmit(e) {
     const content = document.getElementById('postContent').value;
     const tagsInput = document.getElementById('postTags').value;
     const tags = tagsInput ? tagsInput.split(',').map(tag => tag.trim()) : [];
-    
+
+    const imagesSelected = [
+        document.getElementById('postImage1').value,
+        document.getElementById('postImage2').value,
+        document.getElementById('postImage3').value
+    ].filter(Boolean);
+
     const is_published = document.getElementById('postPublished').checked;
     
     try {
@@ -721,14 +743,14 @@ async function handlePostSubmit(e) {
             response = await fetch(`/api/admin-posts?id=${postId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title, content, tags, is_published })
+                body: JSON.stringify({ title, content, tags, images: imagesSelected, is_published })
             });
         } else {
             // Create new post
             response = await fetch('/api/posts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title, content, tags, is_published })
+                body: JSON.stringify({ title, content, tags, images: imagesSelected, is_published })
             });
         }
         

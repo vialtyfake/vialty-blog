@@ -573,6 +573,13 @@
     backdrop-filter: blur(var(--blur-amount));
 }
 
+.post-thumb {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    display: block;
+}
+
 .blog-post::before {
     content: '';
     position: absolute;
@@ -811,6 +818,19 @@
     flex-wrap: wrap;
     color: var(--text-secondary);
     font-size: 14px;
+}
+
+.modal-post-images {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin: 24px 0;
+}
+
+.modal-post-image {
+    width: 100%;
+    border-radius: 16px;
+    object-fit: cover;
 }
 
 .modal-post-content {

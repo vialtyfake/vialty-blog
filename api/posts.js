@@ -40,14 +40,16 @@ export default async function handler(req, res) {
       }
 
       // Create new post
-      const { title, content, tags } = req.body;
+      const { title, content, tags, images = [], is_published = true } = req.body;
+      const limitedImages = Array.isArray(images) ? images.slice(0, 3) : [];
       const newPost = {
         id: Date.now().toString(),
         title,
         content,
         tags: JSON.stringify(tags || []),
+        images: limitedImages,
         created_at: new Date().toISOString(),
-        is_published: true,
+        is_published,
         author_ip: normalizedIP
       };
 
