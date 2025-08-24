@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Personal blog with admin system",
   "scripts": {
-    "dev": "vercel dev",
+    "dev": "next dev",
     "build": "echo 'No build step required'",
     "deploy": "vercel --prod"
   },
@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/vialtyfake/vialty-blog#readme",
   "devDependencies": {
-    "vercel": "^32.0.1"
+    "vercel": "^46.0.2"
   },
   "dependencies": {
     "redis": "^5.8.2"
