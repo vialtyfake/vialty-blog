@@ -1,7 +1,7 @@
 /* Variables */
 :root {
-    --primary-glow: #00d4ff;
-    --secondary-glow: #ff00ff;
+    --primary-glow: #ffffff;
+    --secondary-glow: #777777;
     --glass-bg: rgba(255, 255, 255, 0.04);
     --glass-bg-hover: rgba(255, 255, 255, 0.08);
     --hover-bg: rgba(255, 255, 255, 0.12);
@@ -29,14 +29,27 @@
 }
 
 .mainframe::before {
-    content: "";
+    content: '';
     position: absolute;
     top: -200px;
     left: 50%;
     transform: translateX(-50%);
     width: 1000px;
     height: 400px;
-    background: radial-gradient(circle at 50% 0, rgba(0, 212, 255, 0.4), transparent 70%);
+    background: radial-gradient(circle at 50% 0, rgba(255, 255, 255, 0.15), transparent 70%);
+    pointer-events: none;
+    filter: blur(60px);
+}
+
+.mainframe::after {
+    content: '';
+    position: absolute;
+    bottom: -200px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1000px;
+    height: 400px;
+    background: radial-gradient(circle at 50% 100%, rgba(255, 255, 255, 0.08), transparent 70%);
     pointer-events: none;
     filter: blur(60px);
 }
@@ -99,7 +112,7 @@
 .menu-button:hover {
     background: var(--hover-bg);
     border-color: var(--primary-glow);
-    box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
 }
 
 .menu-icon {
@@ -257,16 +270,16 @@
 
 @keyframes glow {
     from {
-        text-shadow: 
-            0 0 20px rgba(0, 212, 255, 0.5),
-            0 0 40px rgba(0, 212, 255, 0.3),
-            0 0 60px rgba(0, 212, 255, 0.2);
+        text-shadow:
+            0 0 20px rgba(255, 255, 255, 0.4),
+            0 0 40px rgba(255, 255, 255, 0.2),
+            0 0 60px rgba(255, 255, 255, 0.1);
     }
     to {
-        text-shadow: 
-            0 0 30px rgba(255, 0, 255, 0.5),
-            0 0 50px rgba(255, 0, 255, 0.3),
-            0 0 70px rgba(255, 0, 255, 0.2);
+        text-shadow:
+            0 0 30px rgba(170, 170, 170, 0.4),
+            0 0 50px rgba(170, 170, 170, 0.2),
+            0 0 70px rgba(170, 170, 170, 0.1);
     }
 }
 
@@ -327,7 +340,7 @@
     outline: none;
     border-color: var(--primary-glow);
     background: var(--glass-bg-hover);
-    box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
 }
 
 .search-input::placeholder {
@@ -368,6 +381,11 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 50px;
+    padding: 20px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    backdrop-filter: blur(var(--blur-amount));
 }
 
 .section-title {
@@ -393,9 +411,9 @@
 }
 
 .new-post-btn:hover {
-    background: rgba(0, 212, 255, 0.1);
+    background: var(--glass-bg-hover);
     border-color: var(--primary-glow);
-    box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
 }
 
 /* Modern Blog Cards */
@@ -430,8 +448,8 @@
 
 .project-card:hover {
     transform: translateY(-8px);
-    border-color: rgba(0, 212, 255, 0.5);
-    box-shadow: 0 20px 40px rgba(0, 212, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 20px 40px rgba(255, 255, 255, 0.15);
 }
 
 .project-image {
@@ -524,10 +542,10 @@
 
 .blog-post:hover {
     transform: translateY(-8px) scale(1.02);
-    box-shadow: 
-        0 20px 40px rgba(0, 212, 255, 0.15),
-        0 0 60px rgba(255, 0, 255, 0.1);
-    border-color: rgba(0, 212, 255, 0.5);
+    box-shadow:
+        0 20px 40px rgba(255, 255, 255, 0.15),
+        0 0 60px rgba(200, 200, 200, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
 }
 
 .post-card-header {
@@ -552,8 +570,8 @@
 
 .post-category {
     padding: 4px 10px;
-    background: rgba(0, 212, 255, 0.1);
-    border: 1px solid rgba(0, 212, 255, 0.3);
+    background: var(--glass-bg-hover);
+    border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 20px;
     font-size: 11px;
     color: var(--primary-glow);
@@ -602,8 +620,8 @@
 }
 
 .post-tag:hover {
-    background: rgba(0, 212, 255, 0.1);
-    border-color: rgba(0, 212, 255, 0.3);
+    background: var(--glass-bg-hover);
+    border-color: var(--primary-glow);
     color: var(--primary-glow);
 }
 
@@ -720,7 +738,7 @@
 }
 
 .post-modal-body::-webkit-scrollbar-thumb {
-    background: rgba(0, 212, 255, 0.3);
+    background: rgba(255, 255, 255, 0.3);
     border-radius: 4px;
 }
 
@@ -764,7 +782,7 @@
 .modal-tag {
     padding: 8px 16px;
     background: var(--glass-bg);
-    border: 1px solid rgba(0, 212, 255, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 30px;
     backdrop-filter: blur(var(--blur-amount));
     font-size: 14px;
@@ -878,7 +896,7 @@
 .form-group textarea:focus {
     outline: none;
     border-color: var(--primary-glow);
-    box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
 }
 
 .form-actions {
@@ -907,7 +925,7 @@
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(0, 212, 255, 0.4);
+    box-shadow: 0 10px 30px rgba(255, 255, 255, 0.3);
 }
 
 .btn-secondary {

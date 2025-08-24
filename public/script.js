@@ -218,7 +218,7 @@ function setupSearch() {
                 }
             } catch (error) {
                 console.error('Search error:', error);
-                searchResults.innerHTML = '<p style="color: #f44; text-align: center;">Search error occurred</p>';
+                searchResults.innerHTML = '<p style="color: #666; text-align: center;">Search error occurred</p>';
             }
         }, 300);
     });
@@ -509,9 +509,9 @@ function showNotification(message, type = 'info') {
         top: 100px;
         right: 20px;
         padding: 15px 25px;
-        background: ${type === 'success' ? 'linear-gradient(135deg, #00ff88 0%, #00d4ff 100%)' : 
-                      type === 'error' ? 'linear-gradient(135deg, #ff4444 0%, #ff6666 100%)' : 
-                      'linear-gradient(135deg, #00d4ff 0%, #667eea 100%)'};
+        background: ${type === 'success' ? 'linear-gradient(135deg, #ffffff 0%, #bbbbbb 100%)' :
+                      type === 'error' ? 'linear-gradient(135deg, #888888 0%, #555555 100%)' :
+                      'linear-gradient(135deg, #ffffff 0%, #777777 100%)'};
         color: white;
         border-radius: 10px;
         font-weight: 600;

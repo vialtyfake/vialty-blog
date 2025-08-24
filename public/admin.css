@@ -1,20 +1,20 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
-    --admin-primary: #ff3b3b;
-    --admin-primary-light: #ffa63b;
-    --admin-primary-dark: #8b0000;
-    --admin-accent: #ff8c00;
+    --admin-primary: #ffffff;
+    --admin-primary-light: #e5e5e5;
+    --admin-primary-dark: #888888;
+    --admin-accent: #cccccc;
     --admin-bg: #000000;
-    --admin-surface: #1a0000;
-    --admin-surface-light: #2a0a00;
+    --admin-surface: #1a1a1a;
+    --admin-surface-light: #2a2a2a;
     --admin-border: rgba(255, 255, 255, 0.1);
-    --admin-text: #f1f5f9;
-    --admin-text-secondary: #94a3b8;
-    --admin-text-muted: #64748b;
-    --admin-success: #10b981;
-    --admin-danger: #ef4444;
-    --admin-warning: #f59e0b;
+    --admin-text: #f5f5f5;
+    --admin-text-secondary: #a0a0a0;
+    --admin-text-muted: #777777;
+    --admin-success: #777777;
+    --admin-danger: #555555;
+    --admin-warning: #999999;
     --sidebar-width: 260px;
 }
 
@@ -51,9 +51,12 @@ body.sidebar-open {
     left: 0;
     right: 0;
     bottom: 0;
-    background: transparent;
-    opacity: 0;
+    background:
+        radial-gradient(circle at 50% 0, rgba(255, 255, 255, 0.1), transparent 70%),
+        radial-gradient(circle at 80% 100%, rgba(255, 255, 255, 0.05), transparent 70%);
     pointer-events: none;
+    filter: blur(120px);
+    z-index: -1;
 }
 
 /* Access Overlays */
@@ -79,6 +82,7 @@ body.sidebar-open {
     max-width: 480px;
     width: 90%;
     backdrop-filter: blur(20px);
+    border: 1px solid var(--admin-border);
 }
 
 .access-content h2 {
@@ -125,7 +129,7 @@ body.sidebar-open {
 
 .btn-back:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 24px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 12px 24px rgba(255, 255, 255, 0.2);
 }
 
 /* Sidebar */
@@ -337,11 +341,14 @@ body.sidebar-open {
 }
 
 .stat-card {
-    background: var(--admin-surface);
+    background: var(--glass-bg);
+    border: 1px solid var(--admin-border);
     border-radius: 16px;
     padding: 24px;
     position: relative;
     overflow: hidden;
+    backdrop-filter: blur(var(--blur-amount));
+    -webkit-backdrop-filter: blur(var(--blur-amount));
     transition: all 0.3s ease;
 }
 
@@ -357,7 +364,7 @@ body.sidebar-open {
 
 .stat-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 12px 24px rgba(255, 255, 255, 0.1);
 }
 
 .stat-card h3 {
@@ -530,7 +537,7 @@ body.sidebar-open {
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 8px 16px rgba(255, 255, 255, 0.2);
 }
 
 .btn-secondary {
@@ -569,7 +576,8 @@ body.sidebar-open {
 }
 
 .modal-content {
-    background: var(--admin-surface);
+    background: var(--glass-bg);
+    border: 1px solid var(--admin-border);
     border-radius: 20px;
     padding: 32px;
     max-width: 600px;
@@ -579,6 +587,8 @@ body.sidebar-open {
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
     transform: translateY(20px);
     opacity: 0;
+    backdrop-filter: blur(var(--blur-amount));
+    -webkit-backdrop-filter: blur(var(--blur-amount));
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
 }
 
@@ -647,7 +657,7 @@ body.sidebar-open {
 .form-group select:focus {
     outline: none;
     border-color: var(--admin-primary);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
 }
 
 .form-group textarea {
