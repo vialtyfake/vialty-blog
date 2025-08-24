@@ -476,17 +476,20 @@
 .project-card {
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
-    border-radius: 20px;
+    border-radius: 24px;
     overflow: hidden;
     transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
     cursor: pointer;
     backdrop-filter: blur(var(--blur-amount));
+    position: relative;
 }
 
 .project-card:hover {
-    transform: translateY(-6px);
-    border-color: rgba(255, 255, 255, 0.4);
-    box-shadow: 0 14px 34px rgba(255, 255, 255, 0.12);
+    transform: translateY(-8px) scale(1.02);
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow:
+        0 20px 40px rgba(255, 255, 255, 0.15),
+        0 0 60px rgba(200, 200, 200, 0.1);
 }
 
 /* Media wrapper with overlay and shine */
@@ -603,6 +606,23 @@
 
 .project-card:hover .project-arrow {
     transform: translateX(4px);
+}
+
+/* Accent bar to match blog card style */
+.project-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--primary-glow);
+    transform: scaleX(0);
+    transition: transform 0.4s ease;
+}
+
+.project-card:hover::before {
+    transform: scaleX(1);
 }
 
 /* Link in modal */
