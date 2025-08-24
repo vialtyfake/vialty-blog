@@ -1,5 +1,13 @@
 import fs from 'fs/promises';
 import path from 'path';
+
+import { fileURLToPath } from 'url';
+import { getRedisClient } from './_redis.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const IMAGE_DIR = path.join(__dirname, '..', 'public', 'uploads');
+const MAX_SIZE = 4.5 * 1024 * 1024; // 4.5MB
+
 import sharp from 'sharp';
 import { getRedisClient } from './_redis.js';
 
@@ -10,19 +18,9 @@ async function ensureDir() {
   await fs.mkdir(IMAGE_DIR, { recursive: true });
 }
 
-async function optimizeImage(buffer, format) {
-  if (buffer.length <= MAX_SIZE) return buffer;
 
-  let quality = 80;
-  let optimized = buffer;
-  while (optimized.length > MAX_SIZE && quality > 10) {
-    optimized = await sharp(buffer).toFormat(format, { quality }).toBuffer();
-    quality -= 10;
-  }
-  if (optimized.length > MAX_SIZE) {
-    throw new Error('Image exceeds maximum size after optimization');
-  }
-  return optimized;
+async function ensureDir() {
+  await fs.mkdir(IMAGE_DIR, { recursive: true });
 }
 
 export default async function handler(req, res) {
@@ -79,11 +77,17 @@ export default async function handler(req, res) {
 
       try {
         const base64 = data.split(',')[1] || data;
-        let buffer = Buffer.from(base64, 'base64');
+        const buffer = Buffer.from(base64, 'base64');
+        if (buffer.length > MAX_SIZE) {
+          return res.status(400).json({ error: 'Image exceeds maximum size' });
+        }
         const safeName = name.replace(/[^a-zA-Z0-9._-]/g, '');
+
+
         const ext = path.extname(safeName).slice(1).toLowerCase();
         const format = ext === 'jpg' ? 'jpeg' : ext || 'jpeg';
         buffer = await optimizeImage(buffer, format);
+
         await fs.writeFile(path.join(IMAGE_DIR, safeName), buffer);
       } catch (err) {
         return res.status(500).json({ error: 'Failed to save file', details: err.message });
@@ -127,6 +131,12 @@ export default async function handler(req, res) {
         const oldExt = path.extname(safeOld).toLowerCase();
         const newExt = path.extname(safeNew).toLowerCase();
 
+
+        if (oldExt !== newExt) {
+          return res.status(400).json({ error: 'Cannot change file extension' });
+        }
+        await fs.rename(oldPath, newPath);
+
         if (oldExt === newExt) {
           await fs.rename(oldPath, newPath);
         } else {
@@ -136,6 +146,7 @@ export default async function handler(req, res) {
           await fs.writeFile(newPath, buffer);
           await fs.unlink(oldPath);
         }
+
       } catch (err) {
         if (err.code === 'ENOENT') {
           return res.status(404).json({ error: 'File not found' });
