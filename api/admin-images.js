@@ -1,26 +1,34 @@
 import fs from 'fs/promises';
 import path from 'path';
-
-import { fileURLToPath } from 'url';
-import { getRedisClient } from './_redis.js';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const IMAGE_DIR = path.join(__dirname, '..', 'public', 'uploads');
-const MAX_SIZE = 4.5 * 1024 * 1024; // 4.5MB
-
 import sharp from 'sharp';
+
 import { getRedisClient } from './_redis.js';
 
 const IMAGE_DIR = path.join(process.cwd(), 'public', 'uploads');
 const MAX_SIZE = 4.5 * 1024 * 1024; // 4.5MB
+const MAX_DIMENSION = 1200;
 
 async function ensureDir() {
   await fs.mkdir(IMAGE_DIR, { recursive: true });
 }
 
+async function optimizeImage(buffer, format) {
+  const image = sharp(buffer);
+  const metadata = await image.metadata();
 
-async function ensureDir() {
-  await fs.mkdir(IMAGE_DIR, { recursive: true });
+  let { width, height } = metadata;
+  if (width && height) {
+    if (width > height && width > MAX_DIMENSION) {
+      height = Math.round(height * (MAX_DIMENSION / width));
+      width = MAX_DIMENSION;
+    } else if (height > MAX_DIMENSION) {
+      width = Math.round(width * (MAX_DIMENSION / height));
+      height = MAX_DIMENSION;
+    }
+    image.resize(width, height);
+  }
+
+  return image.toFormat(format, { quality: 80 }).toBuffer();
 }
 
 export default async function handler(req, res) {
@@ -77,13 +85,12 @@ export default async function handler(req, res) {
 
       try {
         const base64 = data.split(',')[1] || data;
-        const buffer = Buffer.from(base64, 'base64');
+        let buffer = Buffer.from(base64, 'base64');
         if (buffer.length > MAX_SIZE) {
           return res.status(400).json({ error: 'Image exceeds maximum size' });
         }
+
         const safeName = name.replace(/[^a-zA-Z0-9._-]/g, '');
-
-
         const ext = path.extname(safeName).slice(1).toLowerCase();
         const format = ext === 'jpg' ? 'jpeg' : ext || 'jpeg';
         buffer = await optimizeImage(buffer, format);
@@ -97,7 +104,9 @@ export default async function handler(req, res) {
 
     if (method === 'DELETE') {
       const nameParam = Array.isArray(query?.name) ? query.name[0] : query?.name;
-      if (!nameParam) return res.status(400).json({ error: 'Name required' });
+      if (!nameParam) {
+        return res.status(400).json({ error: 'Name required' });
+      }
 
       const safeName = decodeURIComponent(nameParam).replace(/[^a-zA-Z0-9._-]/g, '');
       try {
@@ -117,6 +126,7 @@ export default async function handler(req, res) {
           return res.status(400).json({ error: 'Invalid JSON' });
         }
       }
+
       const { oldName, newName } = body || {};
       if (!oldName || !newName) {
         return res.status(400).json({ error: 'Old and new names are required' });
@@ -131,12 +141,6 @@ export default async function handler(req, res) {
         const oldExt = path.extname(safeOld).toLowerCase();
         const newExt = path.extname(safeNew).toLowerCase();
 
-
-        if (oldExt !== newExt) {
-          return res.status(400).json({ error: 'Cannot change file extension' });
-        }
-        await fs.rename(oldPath, newPath);
-
         if (oldExt === newExt) {
           await fs.rename(oldPath, newPath);
         } else {
@@ -146,7 +150,6 @@ export default async function handler(req, res) {
           await fs.writeFile(newPath, buffer);
           await fs.unlink(oldPath);
         }
-
       } catch (err) {
         if (err.code === 'ENOENT') {
           return res.status(404).json({ error: 'File not found' });
@@ -163,6 +166,10 @@ export default async function handler(req, res) {
       error: 'Internal server error',
       details: error.message
     });
+  } finally {
+    if (client && client.quit) {
+      await client.quit();
+    }
   }
 }
 
