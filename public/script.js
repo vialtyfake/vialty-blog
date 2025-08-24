@@ -115,12 +115,14 @@ function renderProjects() {
 
     const html = projects.map(project => {
         const imageUrl = resolveImageUrl(project.image);
+        const dateRange = project.startDate ? `${formatDate(new Date(project.startDate))} - ${project.endDate ? formatDate(new Date(project.endDate)) : 'Present'}` : '';
         return `
         <div class="project-card" onclick="openProject('${project.id}')">
             ${project.image ? `<img src="${imageUrl}" alt="${escapeHtml(project.title)}" class="project-image"/>` : ''}
             <div class="project-content">
                 <h3 class="project-title">${escapeHtml(project.title)}</h3>
                 <p class="project-meta">${escapeHtml(project.role)} · ${escapeHtml(project.stack)}</p>
+                ${dateRange ? `<p class="project-dates">${escapeHtml(dateRange)}</p>` : ''}
             </div>
         </div>
     `;
@@ -141,10 +143,12 @@ function openProjectView(project) {
     const body = document.getElementById('projectModalBody');
     if (!modal || !body) return;
     const imageUrl = resolveImageUrl(project.image);
+    const dateRange = project.startDate ? `${formatDate(new Date(project.startDate))} - ${project.endDate ? formatDate(new Date(project.endDate)) : 'Present'}` : '';
     body.innerHTML = `
         ${project.image ? `<img src="${imageUrl}" alt="${escapeHtml(project.title)}" class="modal-project-image"/>` : ''}
         <h1 class="modal-project-title">${escapeHtml(project.title)}</h1>
         <p class="modal-project-meta">${escapeHtml(project.role)} · ${escapeHtml(project.stack)}</p>
+        ${dateRange ? `<p class="modal-project-dates">${escapeHtml(dateRange)}</p>` : ''}
         <p class="modal-project-blurb">${escapeHtml(project.blurb)}</p>
         ${project.link ? `<a href="${project.link}" class="project-link" target="_blank" rel="noopener">Visit Project</a>` : ''}
     `;

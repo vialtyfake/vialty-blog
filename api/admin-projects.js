@@ -42,7 +42,7 @@ export default async function handler(req, res) {
           return res.status(400).json({ error: 'Invalid JSON' });
         }
       }
-      const { title, role, stack, link, blurb, image } = body || {};
+      const { title, role, stack, link, blurb, image, startDate, endDate } = body || {};
       if (!title) {
         return res.status(400).json({ error: 'Title is required' });
       }
@@ -55,6 +55,8 @@ export default async function handler(req, res) {
         link,
         blurb,
         image,
+        startDate,
+        endDate,
         created_at: new Date().toISOString()
       };
 
@@ -74,7 +76,7 @@ export default async function handler(req, res) {
           return res.status(400).json({ error: 'Invalid JSON' });
         }
       }
-      const { title, role, stack, link, blurb, image } = body || {};
+      const { title, role, stack, link, blurb, image, startDate, endDate } = body || {};
 
       const projectsStr = await client.get('projects');
       const projects = projectsStr ? JSON.parse(projectsStr) : [];
@@ -92,6 +94,8 @@ export default async function handler(req, res) {
         link,
         blurb,
         image,
+        startDate,
+        endDate,
         updated_at: new Date().toISOString()
       };
 
