@@ -275,6 +275,14 @@ a {
   animation: fadeIn 0.7s ease;
 }
 
+.images-table-container {
+  overflow-x: auto;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  margin-bottom: 40px;
+  animation: fadeIn 0.7s ease;
+}
+
 .data-table {
   width: 100%;
   border-collapse: separate;
