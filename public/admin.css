@@ -109,6 +109,7 @@ a {
   color: var(--text-secondary);
   transition: var(--transition);
   font-weight: 500;
+  cursor: pointer;
 }
 
 .nav-item svg {
@@ -116,8 +117,7 @@ a {
   transition: var(--transition);
 }
 
-.nav-item:hover,
-.nav-item.active {
+.nav-item:hover {
   background: var(--surface-hover);
   color: var(--text-primary);
   transform: translateX(4px);
@@ -126,6 +126,7 @@ a {
 .nav-item.active {
   background: var(--accent);
   color: #fff;
+  transform: translateX(4px);
 }
 
 .nav-item.active svg {
