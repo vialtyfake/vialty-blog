@@ -270,7 +270,10 @@ function setupEventListeners() {
 
   // Bluesky widget
   if (bskyToggle && bskyWidget) {
-    const isTouch = window.matchMedia('(hover: none)').matches;
+    const isTouch =
+      'ontouchstart' in window ||
+      navigator.maxTouchPoints > 0 ||
+      window.matchMedia('(hover: none)').matches;
     const showWidget = () => {
       bskyWidget.classList.add('show');
       bskyWidget.setAttribute('aria-hidden', 'false');
@@ -561,15 +564,15 @@ style.textContent = `
         }
     }
     
-    @keyframes slideOutFade {
-        from {
-            opacity: 1;
-            transform: translateX(0);
-        }
-        to {
-            opacity: 0;
-            transform: translateX(100px);
-        }
+@keyframes slideOutFade {
+    from {
+        opacity: 1;
+        transform: translateX(0);
     }
+    to {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+}
 `;
 document.head.appendChild(style);
