@@ -1,8 +1,22 @@
 import fs from 'fs/promises';
 import path from 'path';
-import sharp from 'sharp';
 
 import { getRedisClient } from './_redis.js';
+
+let sharpLib = null;
+
+async function getSharp() {
+  if (!sharpLib) {
+    try {
+      const mod = await import('sharp');
+      sharpLib = mod.default || mod;
+    } catch (err) {
+      console.warn('sharp not available, skipping optimization');
+      sharpLib = null;
+    }
+  }
+  return sharpLib;
+}
 
 const IMAGE_DIR = path.join(process.cwd(), 'public', 'uploads');
 const MAX_SIZE = 4.5 * 1024 * 1024; // 4.5MB
@@ -13,6 +27,10 @@ async function ensureDir() {
 }
 
 async function optimizeImage(buffer, format) {
+  const sharp = await getSharp();
+  if (!sharp) {
+    return buffer;
+  }
   const image = sharp(buffer);
   const metadata = await image.metadata();
 
@@ -33,7 +51,6 @@ async function optimizeImage(buffer, format) {
 
 export default async function handler(req, res) {
   const { method, query } = req;
-  let client;
 
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -49,7 +66,7 @@ export default async function handler(req, res) {
                      'unknown';
     const normalizedIP = clientIP.split(',')[0].trim();
 
-    client = await getRedisClient();
+    const client = await getRedisClient();
     const adminIPsStr = await client.get('admin_ips');
     const adminIPs = adminIPsStr ? JSON.parse(adminIPsStr) : ['127.0.0.1', '::1'];
 
@@ -166,10 +183,6 @@ export default async function handler(req, res) {
       error: 'Internal server error',
       details: error.message
     });
-  } finally {
-    if (client && client.quit) {
-      await client.quit();
-    }
   }
 }
 
