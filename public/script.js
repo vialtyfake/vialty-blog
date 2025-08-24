@@ -1,581 +1,122 @@
-// DOM Elements
-const menuButton = document.getElementById('menuButton');
-const navMenu = document.getElementById('navMenu');
-const navClose = document.getElementById('navClose');
-const navLinks = document.querySelectorAll('.nav-link');
-const newPostBtn = document.getElementById('newPostBtn');
-const postModal = document.getElementById('postModal');
-const modalClose = document.getElementById('modalClose');
-const cancelPost = document.getElementById('cancelPost');
-const postForm = document.getElementById('postForm');
-const blogGrid = document.getElementById('blogGrid');
-const projectsGrid = document.getElementById('projectsGrid');
-const bskyWidget = document.getElementById('bskyWidget');
-const bskyToggle = document.getElementById('bskyToggle');
+/*
+ * Markdown and image enhancement for the main blog page
+ *
+ * This script augments the existing blog rendering logic by adding
+ * Markdown parsing (including headings, bold/italic text, lists,
+ * links and images) and by ensuring images embedded in blog posts
+ * uploaded through the admin dashboard render correctly on the
+ * public-facing site. It overrides the default `createPostElement`
+ * and `openPostView` functions when they are available. If those
+ * functions are not yet defined when this script runs, it does
+ * nothing; therefore it should be included after the original
+ * `script.js` to take effect.
+ */
 
-// State
-let blogPosts = [];
-let isAdmin = false;
-window.posts = []; // Global for search
-let projects = [];
-const BSKY_HANDLE = 'vialty.site';
-
-function resolveImageUrl(image) {
-  if (!image) return '';
-  if (image.startsWith('http')) return image;
-  if (image.startsWith('/')) return image;
-  return `/uploads/${image}`;
-}
-
-// Initialize
-document.addEventListener('DOMContentLoaded', async () => {
-    await checkAdminStatus();
-    await loadBlogPosts();
-    await loadProjects();
-    setupEventListeners();
-    setupSearch();
-});
-
-// Check if user is admin
-async function checkAdminStatus() {
-    try {
-        const response = await fetch('/api/admin-check');
-        const data = await response.json();
-        isAdmin = data.isAdmin;
-        
-        // Show/hide new post button based on admin status
-        if (newPostBtn) {
-            newPostBtn.style.display = isAdmin ? 'flex' : 'none';
-        }
-        
-        // Add admin link to navigation if user is admin
-        if (isAdmin) {
-            const existingAdminLink = document.querySelector('.nav-link[href="/admin"]');
-            if (!existingAdminLink) {
-                const adminLink = document.createElement('li');
-                adminLink.innerHTML = '<a href="/admin" class="nav-link">Admin Panel</a>';
-                document.querySelector('.nav-links').appendChild(adminLink);
-            }
-        }
-    } catch (error) {
-        console.error('Error checking admin status:', error);
-        // Hide new post button on error
-        if (newPostBtn) {
-            newPostBtn.style.display = 'none';
-        }
-    }
-}
-
-// Load posts from server
-async function loadBlogPosts() {
-    try {
-        const response = await fetch('/api/posts');
-        blogPosts = await response.json();
-        window.posts = blogPosts; // Store globally for search
-        renderBlogPosts();
-    } catch (error) {
-        console.error('Error loading posts:', error);
-        // Show fallback message
-        blogGrid.innerHTML = `
-            <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: rgba(255,255,255,0.5);">
-                Unable to load posts. Please try again later.
-            </div>
-        `;
-    }
-}
-
-// Load projects from server
-async function loadProjects() {
-    if (!projectsGrid) return;
-    try {
-        const response = await fetch('/api/projects');
-        projects = await response.json();
-        renderProjects();
-    } catch (error) {
-        console.error('Error loading projects:', error);
-        projectsGrid.innerHTML = `
-            <div style="grid-column:1/-1;text-align:center;padding:40px;color:rgba(255,255,255,0.5);">
-                Unable to load projects. Please try again later.
-            </div>
-        `;
-    }
-}
-
-function renderProjects() {
-    if (!projectsGrid) return;
-    if (projects.length === 0) {
-        projectsGrid.innerHTML = `
-            <div style="grid-column:1/-1;text-align:center;padding:40px;color:rgba(255,255,255,0.5);">
-                No projects added yet.
-            </div>
-        `;
-        return;
-    }
-
-    const html = projects.map(project => {
-        const imageUrl = resolveImageUrl(project.image);
-        const dateRange = project.startDate ? `${formatDate(new Date(project.startDate))} - ${project.endDate ? formatDate(new Date(project.endDate)) : 'Present'}` : '';
-        return `
-        <div class="project-card" onclick="openProject('${project.id}')">
-            ${project.image ? `<img src="${imageUrl}" alt="${escapeHtml(project.title)}" class="project-image"/>` : ''}
-            <div class="project-content">
-                <h3 class="project-title">${escapeHtml(project.title)}</h3>
-                <p class="project-meta">${escapeHtml(project.role)} · ${escapeHtml(project.stack)}</p>
-                ${dateRange ? `<p class="project-dates">${escapeHtml(dateRange)}</p>` : ''}
-            </div>
-        </div>
-    `;
-    }).join('');
-
-    projectsGrid.innerHTML = html;
-}
-
-window.openProject = function(projectId) {
-    const project = projects.find(p => p.id === projectId);
-    if (project) {
-        openProjectView(project);
-    }
-};
-
-function openProjectView(project) {
-    const modal = document.getElementById('projectViewModal');
-    const body = document.getElementById('projectModalBody');
-    if (!modal || !body) return;
-    const imageUrl = resolveImageUrl(project.image);
-    const dateRange = project.startDate ? `${formatDate(new Date(project.startDate))} - ${project.endDate ? formatDate(new Date(project.endDate)) : 'Present'}` : '';
-    body.innerHTML = `
-        ${project.image ? `<img src="${imageUrl}" alt="${escapeHtml(project.title)}" class="modal-project-image"/>` : ''}
-        <h1 class="modal-project-title">${escapeHtml(project.title)}</h1>
-        <p class="modal-project-meta">${escapeHtml(project.role)} · ${escapeHtml(project.stack)}</p>
-        ${dateRange ? `<p class="modal-project-dates">${escapeHtml(dateRange)}</p>` : ''}
-        <p class="modal-project-blurb">${escapeHtml(project.blurb)}</p>
-        ${project.link ? `<a href="${project.link}" class="project-link" target="_blank" rel="noopener">Visit Project</a>` : ''}
-    `;
-    modal.classList.add('active');
-    document.body.style.overflow = 'hidden';
-}
-
-window.closeProjectView = function() {
-    const modal = document.getElementById('projectViewModal');
-    modal.classList.remove('active');
-    document.body.style.overflow = 'auto';
-};
-
-// Setup search functionality
-function setupSearch() {
-    const searchInput = document.getElementById('search-input');
-    const searchResults = document.getElementById('search-results');
-    
-    if (!searchInput) return;
-    
-    let searchTimeout;
-    searchInput.addEventListener('input', (e) => {
-        clearTimeout(searchTimeout);
-        const query = e.target.value;
-        
-        if (query.length < 2) {
-            searchResults.innerHTML = '';
-            return;
-        }
-        
-        searchTimeout = setTimeout(async () => {
-            try {
-                const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-                const results = await response.json();
-                
-                if (results.length === 0) {
-                    searchResults.innerHTML = '<p style="color: #999; text-align: center; padding: 1rem;">No results found</p>';
-                } else {
-                    const html = results.map(post => `
-                        <div class="search-result" onclick="displaySinglePost('${post.id}')">
-                            <h3 style="margin: 0 0 0.5rem 0; color: white;">${escapeHtml(post.title)}</h3>
-                            <p style="margin: 0; color: #999; font-size: 0.9rem;">
-                                ${escapeHtml(post.content.substring(0, 150))}...
-                            </p>
-                        </div>
-                    `).join('');
-                    searchResults.innerHTML = html;
-                }
-            } catch (error) {
-                console.error('Search error:', error);
-                searchResults.innerHTML = '<p style="color: #666; text-align: center;">Search error occurred</p>';
-            }
-        }, 300);
+(function() {
+  /**
+   * Convert a subset of Markdown to HTML. Supports headings (H1–H3),
+   * bold, italic, unordered lists, links and images. Unhandled
+   * Markdown is left intact. Images are styled for a clean look.
+   *
+   * @param {string} md The Markdown text to convert
+   * @returns {string} HTML string
+   */
+  function parseMarkdown(md) {
+    let html = md || '';
+    // Images ![alt](url)
+    html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,
+      '<img src="$2" alt="$1" style="max-width:100%;border-radius:12px;margin:1rem 0;">');
+    // Headings ###, ## and # at start of lines
+    html = html.replace(/^### (.*)$/gm, '<h3>$1</h3>');
+    html = html.replace(/^## (.*)$/gm, '<h2>$1</h2>');
+    html = html.replace(/^# (.*)$/gm, '<h1>$1</h1>');
+    // Bold **text**
+    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    // Italic _text_
+    html = html.replace(/_(.*?)_/g, '<em>$1</em>');
+    // Unordered list items starting with '- '
+    html = html.replace(/^(\s*)- (.*)$/gm, function(_, indent, item) {
+      return `${indent}<ul><li>${item}</li></ul>`;
     });
-}
-
-// Event Listeners
-function setupEventListeners() {
-    // Navigation menu
-    menuButton.addEventListener('click', () => {
-        navMenu.classList.add('active');
-        document.body.style.overflow = 'hidden';
-    });
-
-    navClose.addEventListener('click', closeNav);
-
-    navLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            const href = link.getAttribute('href');
-
-            // Allow default navigation for external links and admin panel
-            if (href === '/admin' || link.classList.contains('external-link')) {
-                return;
-            }
-
-            e.preventDefault();
-            const targetId = href.substring(1);
-            closeNav();
-
-            // Smooth scroll to section
-            const targetSection = document.getElementById(targetId);
-            if (targetSection) {
-                targetSection.scrollIntoView({ behavior: 'smooth' });
-            }
-
-            // Update active link
-            navLinks.forEach(l => l.classList.remove('active'));
-            link.classList.add('active');
-        });
-    });
-
-    // Modal controls
-    if (newPostBtn) {
-        newPostBtn.addEventListener('click', () => {
-            if (isAdmin) {
-                postModal.classList.add('active');
-                document.body.style.overflow = 'hidden';
-            }
-        });
-    }
-
-    if (modalClose) {
-        modalClose.addEventListener('click', closeModal);
-    }
-    
-    if (cancelPost) {
-        cancelPost.addEventListener('click', closeModal);
-    }
-
-    // Close modal when clicking outside
-    if (postModal) {
-        postModal.addEventListener('click', (e) => {
-            if (e.target === postModal) {
-                closeModal();
-            }
-        });
-    }
-
-    // Form submission
-    if (postForm) {
-        postForm.addEventListener('submit', handlePostSubmit);
-    }
-
-  // Bluesky widget
-  if (bskyToggle && bskyWidget) {
-    const isTouch =
-      'ontouchstart' in window ||
-      navigator.maxTouchPoints > 0 ||
-      window.matchMedia('(hover: none)').matches;
-    const showWidget = () => {
-      bskyWidget.classList.add('show');
-      bskyWidget.setAttribute('aria-hidden', 'false');
-    };
-    const hideWidget = () => {
-      bskyWidget.classList.remove('show');
-      bskyWidget.setAttribute('aria-hidden', 'true');
-    };
-
-    if (isTouch) {
-      bskyToggle.addEventListener('click', (e) => {
-        e.stopPropagation();
-        bskyWidget.classList.toggle('show');
-        const isShown = bskyWidget.classList.contains('show');
-        bskyWidget.setAttribute('aria-hidden', String(!isShown));
-      });
-
-      document.addEventListener('click', (e) => {
-        if (!bskyWidget.contains(e.target) && e.target !== bskyToggle) {
-          hideWidget();
-        }
-      });
-    } else {
-      bskyToggle.addEventListener('mouseenter', showWidget);
-      bskyToggle.addEventListener('mouseleave', () => {
-        setTimeout(() => {
-          if (!bskyWidget.matches(':hover')) {
-            hideWidget();
-          }
-        }, 100);
-      });
-      bskyWidget.addEventListener('mouseenter', showWidget);
-      bskyWidget.addEventListener('mouseleave', hideWidget);
-    }
+    // Links [text](url)
+    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+    // Convert double newlines to paragraph breaks
+    html = html.replace(/\n{2,}/g, '</p><p>');
+    // Single newlines become <br> for line breaks
+    html = html.replace(/\n/g, '<br>');
+    // Wrap overall content in a paragraph to ensure proper structure
+    return '<p>' + html + '</p>';
   }
 
-    // ESC key to close modals
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            const postViewModal = document.getElementById('postViewModal');
-            if (postViewModal && postViewModal.classList.contains('active')) {
-                closePostView();
-            }
-            if (postModal && postModal.classList.contains('active')) {
-                closeModal();
-            }
-        }
-    });
-}
-
-// Navigation functions
-function closeNav() {
-    navMenu.classList.remove('active');
-    document.body.style.overflow = 'auto';
-}
-
-// Modal functions
-function closeModal() {
-    postModal.classList.remove('active');
-    document.body.style.overflow = 'auto';
-    postForm.reset();
-}
-
-// Blog post functions
-function renderBlogPosts() {
-    blogGrid.innerHTML = '';
-    
-    if (blogPosts.length === 0) {
-        blogGrid.innerHTML = `
-            <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: rgba(255,255,255,0.5);">
-                No posts yet. ${isAdmin ? 'Click "New Post" to create your first post!' : 'Check back soon!'}
-            </div>
-        `;
-        return;
-    }
-    
-    blogPosts.forEach(post => {
-        const postElement = createPostElement(post);
-        blogGrid.appendChild(postElement);
-    });
-}
-
-// Create modern blog post element
-function createPostElement(post) {
-    const article = document.createElement('article');
-    article.className = 'blog-post';
-    
-    // Parse tags
-    let tags = [];
-    try {
+  // Only proceed if createPostElement and openPostView are defined
+  if (typeof createPostElement === 'function') {
+    const origCreate = createPostElement;
+    window.createPostElement = function(post) {
+      const article = document.createElement('article');
+      article.className = 'blog-post';
+      // Parse tags
+      let tags = [];
+      try {
         tags = typeof post.tags === 'string' ? JSON.parse(post.tags || '[]') : post.tags || [];
-    } catch {
+      } catch {
         tags = [];
-    }
-    
-    // Get first tag as category
-    const category = tags[0] || 'General';
-    
-    article.innerHTML = `
-        <div class="post-card-header">
-            <div class="post-meta">
-                <span class="post-date">${formatDate(new Date(post.created_at))}</span>
-                <span class="post-category">${escapeHtml(category)}</span>
-            </div>
-            <h3 class="post-title">${escapeHtml(post.title)}</h3>
+      }
+      const category = tags[0] || 'General';
+      // Extract first image for preview
+      const imgMatch = (post.content || '').match(/!\[[^\]]*\]\(([^)]+)\)/);
+      const imgHTML = imgMatch ? `<img src="${imgMatch[1]}" alt="" class="post-thumbnail" style="width:100%;max-height:200px;object-fit:cover;border-radius:12px;margin-bottom:1rem;">` : '';
+      // Strip images from content for snippet
+      const stripped = (post.content || '').replace(/!\[[^\]]*\]\([^)]*\)/g, '');
+      const snippet = stripped.replace(/\s+/g, ' ').trim().substring(0, 150);
+      article.innerHTML = `
+        <div class="post-header">
+          <span class="post-date">${formatDate(new Date(post.created_at))}</span>
+          <span class="post-category">${escapeHtml(category)}</span>
         </div>
-        <p class="post-excerpt">${escapeHtml(post.content.substring(0, 150))}...</p>
-        <div class="post-card-footer">
-            <div class="post-tags">
-                ${tags.slice(0, 3).map(tag => `<span class="post-tag">#${escapeHtml(tag)}</span>`).join('')}
-            </div>
-            <span class="read-more">Read more →</span>
-        </div>
-    `;
-    
-    // Add click event to display full post in modal
-    article.addEventListener('click', (e) => {
+        ${imgHTML}
+        <h3>${escapeHtml(post.title)}</h3>
+        <p>${escapeHtml(snippet)}...</p>
+        <div class="post-tags">${tags.slice(0, 3).map(tag => ` #${escapeHtml(tag)} `).join('')}</div>
+        <a href="#" class="read-more">Read more →</a>
+      `;
+      article.addEventListener('click', (e) => {
         e.preventDefault();
         openPostView(post);
-    });
-    
-    return article;
-}
-
-// Open post in modal
-function openPostView(post) {
-    const modal = document.getElementById('postViewModal');
-    const modalBody = document.getElementById('postModalBody');
-    
-    // Parse tags
-    let tags = [];
-    try {
+      });
+      return article;
+    };
+  }
+  if (typeof openPostView === 'function') {
+    window.openPostView = function(post) {
+      const modal = document.getElementById('postViewModal');
+      const modalBody = document.getElementById('postModalBody');
+      if (!modal || !modalBody) return;
+      // Parse tags
+      let tags = [];
+      try {
         tags = typeof post.tags === 'string' ? JSON.parse(post.tags || '[]') : post.tags || [];
-    } catch {
+      } catch {
         tags = [];
-    }
-    
-    modalBody.innerHTML = `
-        <div class="modal-post-header">
-            <h1 class="modal-post-title">${escapeHtml(post.title)}</h1>
-            <div class="modal-post-meta">
-                <span>📅 ${formatDate(new Date(post.created_at))}</span>
-                <span>📝 ${post.content.split(' ').length} words</span>
-                <span>⏱️ ${Math.ceil(post.content.split(' ').length / 200)} min read</span>
-            </div>
+      }
+      modalBody.innerHTML = `
+        <h2>${escapeHtml(post.title)}</h2>
+        <div class="meta">
+          <span>📅 ${formatDate(new Date(post.created_at))}</span>
+          <span>📝 ${post.content.split(' ').length} words</span>
+          <span>⏱️ ${Math.ceil(post.content.split(' ').length / 200)} min read</span>
         </div>
-        <div class="modal-post-content">
-            ${escapeHtml(post.content).replace(/\n/g, '<br>')}
-        </div>
-        ${tags.length > 0 ? `
-            <div class="modal-post-tags">
-                ${tags.map(tag => `<span class="modal-tag">#${escapeHtml(tag)}</span>`).join('')}
-            </div>
-        ` : ''}
-    `;
-    
-    modal.classList.add('active');
-    document.body.style.overflow = 'hidden';
-    
-    // Animate content
-    modalBody.style.opacity = '0';
-    modalBody.style.transform = 'translateY(20px)';
-    setTimeout(() => {
+        <div class="content">${parseMarkdown(post.content)}</div>
+        ${tags.length ? `<div class="tags">${tags.map(tag => ` #${escapeHtml(tag)} `).join('')}</div>` : ''}
+      `;
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      modalBody.style.opacity = '0';
+      modalBody.style.transform = 'translateY(20px)';
+      setTimeout(() => {
         modalBody.style.transition = 'all 0.4s ease';
         modalBody.style.opacity = '1';
         modalBody.style.transform = 'translateY(0)';
-    }, 100);
-}
-
-// Close post view modal
-window.closePostView = function() {
-    const modal = document.getElementById('postViewModal');
-    modal.classList.remove('active');
-    document.body.style.overflow = 'auto';
-}
-
-// Display single post (for search results)
-window.displaySinglePost = function(postId) {
-    const post = blogPosts.find(p => p.id === postId);
-    if (post) {
-        openPostView(post);
-        // Clear search
-        const searchInput = document.getElementById('search-input');
-        const searchResults = document.getElementById('search-results');
-        if (searchInput) searchInput.value = '';
-        if (searchResults) searchResults.innerHTML = '';
-    }
-}
-
-async function handlePostSubmit(e) {
-    e.preventDefault();
-    
-    if (!isAdmin) {
-        showNotification('You do not have permission to create posts.', 'error');
-        return;
-    }
-    
-    const title = document.getElementById('postTitle').value;
-    const content = document.getElementById('postContent').value;
-    const tagsInput = document.getElementById('postTags').value;
-    const tags = tagsInput ? tagsInput.split(',').map(tag => tag.trim()) : [];
-    
-    try {
-        const response = await fetch('/api/posts', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ title, content, tags })
-        });
-        
-        if (response.ok) {
-            const newPost = await response.json();
-            closeModal();
-            await loadBlogPosts(); // Reload posts from server
-            
-            // Show success message
-            showNotification('Post published successfully!', 'success');
-        } else {
-            const error = await response.json();
-            showNotification(error.error || 'Failed to create post', 'error');
-        }
-    } catch (error) {
-        console.error('Error creating post:', error);
-        showNotification('Failed to create post. Please try again.', 'error');
-    }
-}
-
-// Utility functions
-function formatDate(date) {
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    return date.toLocaleDateString('en-US', options);
-}
-
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text || '';
-    return div.innerHTML;
-}
-
-function showNotification(message, type = 'info') {
-    // Remove existing notifications
-    const existing = document.querySelector('.notification');
-    if (existing) {
-        existing.remove();
-    }
-    
-    const notification = document.createElement('div');
-    notification.className = 'notification';
-    notification.style.cssText = `
-        position: fixed;
-        top: 100px;
-        right: 20px;
-        padding: 15px 25px;
-        background: ${type === 'success' ? 'linear-gradient(135deg, #ffffff 0%, #bbbbbb 100%)' :
-                      type === 'error' ? 'linear-gradient(135deg, #888888 0%, #555555 100%)' :
-                      'linear-gradient(135deg, #ffffff 0%, #777777 100%)'};
-        color: white;
-        border-radius: 10px;
-        font-weight: 600;
-        z-index: 9999;
-        animation: slideInFade 0.3s ease;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    `;
-    notification.textContent = message;
-    
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.style.animation = 'slideOutFade 0.3s ease';
-        setTimeout(() => {
-            notification.remove();
-        }, 300);
-    }, 3000);
-}
-
-// Add animation styles
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideInFade {
-        from {
-            opacity: 0;
-            transform: translateX(100px);
-        }
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
-    }
-    
-@keyframes slideOutFade {
-    from {
-        opacity: 1;
-        transform: translateX(0);
-    }
-    to {
-        opacity: 0;
-        transform: translateX(100px);
-    }
-}
-`;
-document.head.appendChild(style);
+      }, 100);
+    };
+  }
+})();
