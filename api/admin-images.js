@@ -51,7 +51,6 @@ async function optimizeImage(buffer, format) {
 
 export default async function handler(req, res) {
   const { method, query } = req;
-  let client;
 
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -67,7 +66,7 @@ export default async function handler(req, res) {
                      'unknown';
     const normalizedIP = clientIP.split(',')[0].trim();
 
-    client = await getRedisClient();
+    const client = await getRedisClient();
     const adminIPsStr = await client.get('admin_ips');
     const adminIPs = adminIPsStr ? JSON.parse(adminIPsStr) : ['127.0.0.1', '::1'];
 
@@ -184,6 +183,10 @@ export default async function handler(req, res) {
       error: 'Internal server error',
       details: error.message
     });
+
+  }
+}
+
 
   }
 }
