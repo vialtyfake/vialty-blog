@@ -589,8 +589,8 @@ textarea {
   to { transform: rotate(360deg); }
 }
 
-.nav-item svg path,
-.modal-close svg path {
+/* Make all SVG icons white */
+svg path {
   stroke: white !important;
 }
 
