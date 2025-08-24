@@ -18,6 +18,7 @@ window.posts = []; // Global for search
 let projects = [];
 
 const BLOB_BASE_URL = 'https://vialty-blog-images.vercel-blob.com';
+const BSKY_HANDLE = 'vialty.site';
 
 function resolveImageUrl(image) {
     if (!image) return '';
