@@ -112,10 +112,10 @@
 /* Main Container */
 .mainframe {
     background: transparent;
-    min-height: 100vh;
+    height: 100vh; /* Fixed height to create scroll container */
     position: relative;
     overflow-x: hidden;
-    overflow-y: visible; /* Ensure no vertical scrolling within mainframe */
+    overflow-y: auto; /* Make mainframe the primary scroll container */
     width: 100%;
     animation: fadeInUp var(--timing-slower) var(--ease-out-quart);
     padding-top: 80px; /* Account for fixed header */
@@ -1550,6 +1550,10 @@
 }
 
 @media (max-width: 768px) {
+    .mainframe {
+        padding-top: 70px; /* Account for smaller mobile header */
+    }
+    
     .top-bar {
         height: 70px;
         padding: 0 20px;
@@ -1568,7 +1572,7 @@
     
     .hero-section {
         padding: 100px 20px 60px;
-        min-height: 80vh;
+        min-height: calc(100vh - 170px); /* Adjust for mobile header */
     }
     
     .main-heading {
@@ -1717,6 +1721,10 @@
 }
 
 @media (max-width: 480px) {
+    .mainframe {
+        padding-top: 64px; /* Account for even smaller mobile header */
+    }
+    
     .top-bar {
         height: 64px;
         padding: 0 16px;
@@ -1735,7 +1743,7 @@
     
     .hero-section {
         padding: 80px 16px 40px;
-        min-height: 70vh;
+        min-height: calc(100vh - 144px); /* Adjust for smallest mobile header */
     }
     
     .main-heading {

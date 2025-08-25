@@ -100,7 +100,8 @@ html, body {
 }
 
 html {
-    overflow-x: hidden;
+    overflow: hidden; /* Prevent any scrolling at document level */
+    height: 100vh;
 }
 
 body {
@@ -112,9 +113,10 @@ body {
     color: var(--text-primary);
     animation: fadePageIn var(--timing-slower) var(--ease-out-quart);
     position: relative;
-    overflow-x: hidden;
-    min-height: 100vh;
-    overflow-y: auto; /* Ensure body handles all vertical scrolling */
+    overflow: hidden; /* Prevent body from scrolling */
+    height: 100vh;
+    margin: 0;
+    padding: 0;
 }
 
 /* Enhanced Page Fade Animation */
