@@ -117,6 +117,7 @@
     overflow-x: hidden;
     width: 100%;
     animation: fadeInUp var(--timing-slower) var(--ease-out-quart);
+    padding-top: 80px; /* Account for fixed header */
 }
 
 .mainframe::before {
@@ -437,7 +438,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 100vh;
+    min-height: calc(100vh - 80px);
     text-align: center;
     padding: 20px;
     position: relative;
@@ -617,7 +618,7 @@
 
 /* Blog Section */
 .blog-section {
-    padding: 120px 30px 80px;
+    padding: 40px 30px 80px;
     max-width: 1400px;
     margin: 0 auto;
     animation: fadeInUp var(--timing-slower) var(--ease-out-quart) 0.2s;
@@ -885,7 +886,7 @@
 
 /* Projects Section */
 .projects-section {
-    padding: 100px 30px 40px;
+    padding: 20px 30px 40px;
     animation: fadeInUp var(--timing-slower) var(--ease-out-quart) 0.4s;
 }
 
