@@ -115,6 +115,7 @@
     min-height: 100vh;
     position: relative;
     overflow-x: hidden;
+    width: 100%;
     animation: fadeInUp var(--timing-slower) var(--ease-out-quart);
 }
 
@@ -154,7 +155,6 @@
     width: 100%;
     max-width: 1920px;
     margin: 0 auto;
-    min-height: 100vh;
     position: relative;
     padding: 0 40px;
 }
