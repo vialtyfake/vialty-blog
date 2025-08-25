@@ -51,10 +51,10 @@ async function checkAdminStatus() {
         
         // Add admin link and load images if user is admin
         if (isAdmin) {
-            const existingAdminLink = document.querySelector('.nav-link[href="/admin"]');
+            const existingAdminLink = document.querySelector('.nav-link[href="/admin/dashboard.html"]');
             if (!existingAdminLink) {
                 const adminLink = document.createElement('li');
-                adminLink.innerHTML = '<a href="/admin" class="nav-link">Admin Panel</a>';
+                adminLink.innerHTML = '<a href="/admin/dashboard.html" class="nav-link">Admin Panel</a>';
                 document.querySelector('.nav-links').appendChild(adminLink);
             }
             await loadAvailableImages();
@@ -269,7 +269,7 @@ function setupEventListeners() {
             const href = link.getAttribute('href');
 
             // Allow default navigation for external links and admin panel
-            if (href === '/admin' || link.classList.contains('external-link')) {
+            if (href === '/admin' || href === '/admin/dashboard.html' || link.classList.contains('external-link')) {
                 return;
             }
 
