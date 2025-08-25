@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin IPs - Admin Dashboard - VIALTY</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="../favicon.png" />
+  
+  <!-- Meta Description -->
+  <meta name="description" content="Manage admin IPs for VIALTY admin dashboard." />
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="shared/admin-base.css" />
+  <link rel="stylesheet" href="shared/admin-animations.css" />
+  
+  <style>
+    /* IPs page specific styles */
+    .admin-layout {
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    .sidebar {
+      width: 280px;
+      background: var(--glass-bg);
+      backdrop-filter: var(--blur-heavy);
+      -webkit-backdrop-filter: var(--blur-heavy);
+      border-right: 1px solid var(--glass-border);
+      padding: 32px 20px;
+      position: fixed;
+      left: 0;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 100;
+      box-shadow: var(--glass-shadow);
+    }
+    
+    /* Sidebar styles */
+    .sidebar-header {
+      margin-bottom: 40px;
+      text-align: center;
+    }
+    
+    .sidebar-logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--text-primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+    
+    .admin-badge {
+      background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+      color: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      box-shadow: 0 2px 8px var(--accent-light);
+    }
+    
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 40px;
+    }
+    
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: var(--transition-spring);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .nav-item::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--accent-light), transparent);
+      opacity: 0;
+      transition: var(--transition-normal);
+    }
+    
+    .nav-item:hover {
+      color: var(--text-primary);
+      transform: translateX(8px);
+      background: var(--glass-bg-hover);
+    }
+    
+    .nav-item:hover::before {
+      opacity: 1;
+    }
+    
+    .nav-item.active {
+      background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+      color: white;
+      transform: translateX(8px);
+      box-shadow: 0 4px 16px var(--accent-light);
+    }
+    
+    .nav-item svg {
+      flex-shrink: 0;
+      transition: var(--transition-normal);
+    }
+    
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 16px;
+      border-radius: 16px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      text-align: center;
+    }
+    
+    .admin-ip {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+    
+    .main-content {
+      margin-left: 280px;
+      flex: 1;
+      padding: 40px;
+      min-height: 100vh;
+    }
+    
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+      animation: slideUp 0.6s var(--ease-out-expo);
+    }
+    
+    .page-title {
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--text-primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    /* IPs table */
+    .ips-container {
+      background: var(--glass-bg);
+      backdrop-filter: var(--blur-medium);
+      -webkit-backdrop-filter: var(--blur-medium);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--glass-shadow);
+      animation: slideUp 0.8s var(--ease-out-expo);
+    }
+    
+    .data-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+    
+    .data-table th,
+    .data-table td {
+      padding: 16px 20px;
+      text-align: left;
+      border-bottom: 1px solid var(--glass-border);
+    }
+    
+    .data-table th {
+      background: var(--glass-bg-hover);
+      color: var(--text-secondary);
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .data-table tbody tr {
+      transition: var(--transition-normal);
+    }
+    
+    .data-table tbody tr:hover {
+      background: var(--glass-bg-hover);
+      transform: translateX(2px);
+    }
+    
+    .data-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+    
+    .status-badge {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .status-badge.published {
+      background: var(--success-light);
+      color: var(--success);
+    }
+    
+    .status-badge.draft {
+      background: var(--warning-light);
+      color: var(--warning);
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+    }
+    
+    /* Mobile responsiveness */
+    @media (max-width: 1024px) {
+      .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+      }
+      
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      
+      .main-content {
+        margin-left: 0;
+        padding: 80px 20px 20px;
+      }
+      
+      .sidebar-toggle {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 200;
+        background: var(--glass-bg);
+        backdrop-filter: var(--blur-medium);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        padding: 12px;
+        cursor: pointer;
+        transition: var(--transition-normal);
+      }
+      
+      .sidebar-toggle:hover {
+        background: var(--glass-bg-hover);
+        transform: scale(1.05);
+      }
+      
+      .sidebar-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: var(--blur-light);
+        z-index: 50;
+        opacity: 0;
+        visibility: hidden;
+        transition: var(--transition-normal);
+      }
+      
+      .sidebar-overlay.active {
+        opacity: 1;
+        visibility: visible;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Access Check Overlay -->
+  <div id="accessCheck" class="modal-overlay">
+    <div class="glass-card">
+      <h2>Checking Access...</h2>
+      <div class="loading-dots"></div>
+    </div>
+  </div>
+
+  <!-- Access Denied Overlay -->
+  <div id="accessDenied" class="modal-overlay" style="display: none;">
+    <div class="glass-card">
+      <h2>Access Denied</h2>
+      <p>Your IP address is not authorized to access this admin panel.</p>
+      <p class="admin-ip">Your IP: <span id="userIP"></span></p>
+      <a href="/" class="btn btn-primary" style="margin-top: 20px;">Go Back to Home</a>
+    </div>
+  </div>
+
+  <!-- Main Admin Layout -->
+  <div id="adminDashboard" class="admin-layout" style="display: none;">
+    <!-- Mobile Toggle -->
+    <button id="sidebarToggle" class="sidebar-toggle" style="display: none;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" stroke-width="2"/>
+      </svg>
+    </button>
+    
+    <!-- Sidebar Overlay -->
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">VIALTY</div>
+        <div class="admin-badge">ADMIN</div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="nav-item">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M3 4h6v6H3zM11 4h6v6h-6zM3 12h6v6H3zM11 12h6v6h-6z" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+          Dashboard
+        </a>
+        
+        <a href="posts.html" class="nav-item">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M5 3h10v14H5V3z" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M8 7h4M8 10h4M8 13h2" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+          Blog Posts
+        </a>
+        
+        <a href="projects.html" class="nav-item">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M4 4h12v12H4z" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M4 10h12M10 4v12" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+          Projects
+        </a>
+        
+        <a href="images.html" class="nav-item">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M3 4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4z" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M8 9l2 2 3-3 3 3v4H4v-3l4-3z" stroke="currentColor" stroke-width="1.5"/>
+            <circle cx="7" cy="7" r="1.5" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+          Images
+        </a>
+        
+        <a href="ips.html" class="nav-item active">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M10 2v16M2 10h16" stroke="currentColor" stroke-width="1.5"/>
+            <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+          Admin IPs
+        </a>
+        
+        <a href="/" class="nav-item">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M3 10h14M10 3l7 7-7 7" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+          View Site
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="admin-ip">IP: <span id="adminIP"></span></div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Page Header -->
+      <header class="page-header">
+        <h1 class="page-title">Admin IPs</h1>
+        <button class="btn btn-primary" id="addIPBtn">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M10 4v12m-6-6h12" stroke="currentColor" stroke-width="2"/>
+          </svg>
+          Add IP
+        </button>
+      </header>
+
+      <!-- IPs Table -->
+      <section class="ips-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>IP Address</th>
+              <th>Name</th>
+              <th>Status</th>
+              <th>Added</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="ipsTableBody">
+            <!-- IPs will be loaded here -->
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer" style="margin-left: 280px;">
+    <p>© 2025 VIALTY · <a href="/security">Security</a></p>
+    <p>Contact: <a href="https://github.com/vialtyfake" target="_blank" rel="noopener noreferrer">GitHub</a> |
+        <a href="https://bsky.app/profile/vialty.site" target="_blank" rel="noopener noreferrer">Bluesky</a>
+    </p>
+  </footer>
+
+  <script src="shared/admin-sidebar.js"></script>
+  <script>
+    // IPs functionality - simplified version
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(initializeIPsPage, 100);
+    });
+
+    async function initializeIPsPage() {
+      if (!window.adminSidebar?.isAdmin()) {
+        return;
+      }
+      
+      try {
+        await loadIPs();
+      } catch (error) {
+        console.error('Error initializing IPs page:', error);
+        window.adminSidebar?.showNotification('Failed to load IPs data', 'error');
+      }
+    }
+
+    async function loadIPs() {
+      try {
+        const tbody = document.getElementById('ipsTableBody');
+        // Show current IP as active admin for now
+        tbody.innerHTML = `
+          <tr>
+            <td>Current IP</td>
+            <td>Current Admin</td>
+            <td><span class="status-badge published">Active</span></td>
+            <td>${new Date().toLocaleDateString()}</td>
+            <td>-</td>
+          </tr>
+        `;
+      } catch (error) {
+        console.error('Error loading IPs:', error);
+      }
+    }
+  </script>
+</body>
+</html>
