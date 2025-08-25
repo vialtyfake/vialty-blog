@@ -114,6 +114,7 @@ body {
     position: relative;
     overflow-x: hidden;
     min-height: 100vh;
+    overflow-y: auto; /* Ensure body handles all vertical scrolling */
 }
 
 /* Enhanced Page Fade Animation */
